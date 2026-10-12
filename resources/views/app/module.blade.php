@@ -1,0 +1,1 @@
+<x-layouts.app><div class="max-w-3xl"><p class="font-mono text-xs text-brand-yellow">COMMAND CENTER</p><h1 class="mt-2 font-display text-3xl font-bold text-white">{{ $module }}</h1><p class="mt-3 text-zinc-400">Modul ini sedang dihubungkan ke alur operasional dan data periode aktif.</p></div></x-layouts.app>
