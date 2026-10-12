@@ -2,6 +2,15 @@
 
 namespace App\Livewire\Public;
 
+use App\Actions\Aspiration\SubmitAspirationAction;
+use App\Actions\Attendance\RecordAttendanceAction;
+use App\Actions\Inventory\CreateBorrowingRequestAction;
+use App\Models\Aspiration;
+use App\Models\AttendanceSession;
+use App\Models\DesignAsset;
+use App\Models\Inventory;
+use App\Models\Period;
+use Carbon\Carbon;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -13,7 +22,8 @@ class ServiceHub extends Component
     public string $activeTab = 'borrow'; // 'borrow', 'qr', 'aspiration', 'assets'
 
     // Form Peminjaman Alat
-    public string $borrowTool = 'Total Station Sokkia CX-105';
+    public ?int $borrowInventoryId = null;
+    public string $borrowTool = '';
     public string $borrowName = '';
     public string $borrowNim = '';
     public string $borrowStartDate = '';
@@ -34,57 +44,43 @@ class ServiceHub extends Component
     public string $trackTicketInput = '';
     public ?array $trackTicketResult = null;
 
-    // Katalog Alat
-    public array $tools = [
-        [
-            'name' => 'Total Station Sokkia CX-105',
-            'category' => 'Instrumen Survei Digital',
-            'stock' => 3,
-            'specs' => 'Akurasi 5 detik, EDM reflectorless 500m, laser dual-axis.',
-            'status' => 'Tersedia',
-            'image' => 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?auto=format&fit=crop&w=400&q=80',
-        ],
-        [
-            'name' => 'Theodolite Digital Topcon DT-200',
-            'category' => 'Pengukuran Sudut & Poligon',
-            'stock' => 5,
-            'specs' => 'Pembacaan optik digital resolusi tinggi, tahan debu IP66.',
-            'status' => 'Tersedia',
-            'image' => 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=400&q=80',
-        ],
-        [
-            'name' => 'Waterpass Otomatis Nikon AC-2S',
-            'category' => 'Pengukuran Beda Tinggi / Sipat Datar',
-            'stock' => 6,
-            'specs' => 'Perbesaran lensa 24x, kompensator otomatis redaman magnetik.',
-            'status' => 'Tersedia',
-            'image' => 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=400&q=80',
-        ],
-        [
-            'name' => 'Concrete Hammer Test Schmidt',
-            'category' => 'Uji Non-Destruktif Kuat Tekan Beton',
-            'stock' => 2,
-            'specs' => 'Tipe N rentang 10 - 70 N/mm2, kurva konversi SNI terkalibrasi.',
-            'status' => 'Tersedia',
-            'image' => 'https://images.unsplash.com/photo-1541888946425-d0fbb186c5f7?auto=format&fit=crop&w=400&q=80',
-        ],
-    ];
+    public function mount(): void
+    {
+        $inventory = Inventory::query()->where('is_active', true)->first();
+        $this->borrowInventoryId = $inventory?->id;
+        $this->borrowTool = $inventory?->name ?? 'Belum ada alat tersedia';
+    }
 
     public function setTab(string $tab): void
     {
         $this->activeTab = $tab;
     }
 
-    public function submitBorrowForm(): void
+    public function selectInventory(int $inventoryId): void
+    {
+        $inventory = Inventory::findOrFail($inventoryId);
+        $this->borrowInventoryId = $inventory->id;
+        $this->borrowTool = $inventory->name;
+    }
+
+    public function submitBorrowForm(CreateBorrowingRequestAction $action): void
     {
         $this->validate([
             'borrowName' => 'required|min:3',
             'borrowNim' => 'required|min:5',
-            'borrowStartDate' => 'required',
-            'borrowEndDate' => 'required',
+            'borrowInventoryId' => 'required|exists:inventories,id',
+            'borrowStartDate' => 'required|date',
+            'borrowEndDate' => 'required|date|after:borrowStartDate',
             'borrowPurpose' => 'required|min:5',
         ]);
 
+        $period = Period::current();
+        if (! $period) { $this->addError('borrowInventoryId', 'Periode aktif belum tersedia.'); return; }
+        $action->execute($period, Inventory::findOrFail($this->borrowInventoryId), [
+            'requester_name' => $this->borrowName,
+            'requester_nim' => $this->borrowNim,
+            'purpose' => $this->borrowPurpose,
+        ], Carbon::parse($this->borrowStartDate)->startOfDay(), Carbon::parse($this->borrowEndDate)->endOfDay());
         $this->borrowSuccess = true;
     }
 
@@ -98,24 +94,29 @@ class ServiceHub extends Component
         $this->borrowPurpose = '';
     }
 
-    public function submitAttendance(): void
+    public function submitAttendance(RecordAttendanceAction $action): void
     {
         $this->validate([
-            'qrToken' => 'required|min:4',
+            'qrToken' => 'required|digits:6',
             'qrNim' => 'required|min:5',
         ]);
 
+        $session = AttendanceSession::query()->where('status', 'aktif')->where('starts_at', '<=', now())->where('ends_at', '>=', now())->latest('starts_at')->first();
+        if (! $session) { $this->addError('qrToken', 'Tidak ada sesi presensi aktif saat ini.'); return; }
+        $action->execute($session, $this->qrNim, $this->qrToken);
         $this->qrAttendanceStatus = 'success';
     }
 
-    public function submitAspiration(): void
+    public function submitAspiration(SubmitAspirationAction $action): void
     {
         $this->validate([
             'aspirationMessage' => 'required|min:10',
         ]);
 
-        // Generate nomor tiket anonim
-        $this->aspirationTrackingCode = 'ASP-' . date('Y') . '-' . strtoupper(substr(md5(uniqid()), 0, 5));
+        $period = Period::current();
+        if (! $period) { $this->addError('aspirationMessage', 'Periode aktif belum tersedia.'); return; }
+        $aspiration = $action->execute($period, $this->aspirationCategory, $this->aspirationMessage);
+        $this->aspirationTrackingCode = $aspiration->tracking_code;
         $this->aspirationSubmitted = true;
         $this->aspirationMessage = '';
     }
@@ -129,13 +130,14 @@ class ServiceHub extends Component
             return;
         }
 
-        if (str_starts_with($code, 'ASP-')) {
+        $aspiration = Aspiration::withoutGlobalScopes()->where('tracking_code', $code)->first();
+        if ($aspiration) {
             $this->trackTicketResult = [
-                'code' => $code,
-                'status' => 'Sedang Ditindaklanjuti',
-                'category' => 'Fasilitas & Lab',
-                'date' => date('d M Y'),
-                'response' => 'Aspirasi Anda telah diagendakan dalam audiensi bersama Ketua Program Studi dan Pengelola Lab Struktur.',
+                'code' => $aspiration->tracking_code,
+                'status' => $aspiration->status,
+                'category' => $aspiration->category,
+                'date' => $aspiration->created_at->format('d M Y'),
+                'response' => $aspiration->response ?: 'Aspirasi telah diterima dan menunggu tindak lanjut pengurus.',
             ];
         } else {
             $this->trackTicketResult = [
@@ -148,6 +150,9 @@ class ServiceHub extends Component
 
     public function render()
     {
-        return view('livewire.public.service-hub');
+        return view('livewire.public.service-hub', [
+            'tools' => Inventory::query()->where('is_active', true)->orderBy('name')->get(),
+            'assets' => DesignAsset::query()->where('is_public', true)->orderBy('title')->get(),
+        ]);
     }
 }

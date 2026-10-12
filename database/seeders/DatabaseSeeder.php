@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Division;
 use App\Models\Member;
+use App\Models\Inventory;
 use App\Models\Period;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -220,6 +221,20 @@ class DatabaseSeeder extends Seeder
                     'sort_order' => 1,
                 ]
             );
+        }
+
+        foreach ([
+            ['name' => 'Total Station Sokkia CX-105', 'code' => 'INV-TS-001', 'category' => 'Instrumen Survei Digital', 'specification' => 'Akurasi 5 detik, EDM reflectorless 500m.', 'total_qty' => 3],
+            ['name' => 'Theodolite Digital Topcon DT-200', 'code' => 'INV-TD-001', 'category' => 'Pengukuran Sudut & Poligon', 'specification' => 'Pembacaan optik digital, tahan debu IP66.', 'total_qty' => 5],
+            ['name' => 'Waterpass Otomatis Nikon AC-2S', 'code' => 'INV-WP-001', 'category' => 'Pengukuran Beda Tinggi', 'specification' => 'Lensa 24x dan kompensator otomatis.', 'total_qty' => 6],
+            ['name' => 'Concrete Hammer Test Schmidt', 'code' => 'INV-HT-001', 'category' => 'Uji Beton', 'specification' => 'Tipe N untuk pengujian non-destruktif.', 'total_qty' => 2],
+        ] as $inventory) {
+            Inventory::firstOrCreate(['code' => $inventory['code']], array_merge($inventory, [
+                'period_id' => $period->id,
+                'available_qty' => $inventory['total_qty'],
+                'condition' => 'baik',
+                'is_active' => true,
+            ]));
         }
     }
 }
