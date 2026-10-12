@@ -63,20 +63,20 @@
                             <div class="clean-card p-5 flex flex-col justify-between group">
                                 <div>
                                     <div class="h-40 rounded-xl overflow-hidden bg-black/40 mb-4 border border-white/5 relative">
-                                        <img src="{{ $tool['image'] }}" alt="{{ $tool['name'] }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform">
+                                        <div class="flex h-full items-center justify-center font-mono text-xs text-zinc-500">{{ $tool->code }}</div>
                                         <span class="absolute top-2 right-2 px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-mono">
-                                            {{ $tool['stock'] }} Unit Tersedia
+                                            {{ $tool->available_qty }} Unit Tersedia
                                         </span>
                                     </div>
-                                    <span class="text-[10px] font-mono text-brand-yellow uppercase block">{{ $tool['category'] }}</span>
-                                    <h4 class="font-display font-bold text-base text-white mt-1 mb-2">{{ $tool['name'] }}</h4>
-                                    <p class="text-xs text-zinc-400 font-sans leading-relaxed">{{ $tool['specs'] }}</p>
+                                    <span class="text-[10px] font-mono text-brand-yellow uppercase block">{{ $tool->category }}</span>
+                                    <h4 class="font-display font-bold text-base text-white mt-1 mb-2">{{ $tool->name }}</h4>
+                                    <p class="text-xs text-zinc-400 font-sans leading-relaxed">{{ $tool->specification }}</p>
                                 </div>
 
                                 <div class="mt-5 pt-3 border-t border-white/10 flex items-center justify-between">
-                                    <span class="text-xs font-mono text-zinc-400">Status: <strong class="text-emerald-400">{{ $tool['status'] }}</strong></span>
+                                    <span class="text-xs font-mono text-zinc-400">Status: <strong class="text-emerald-400">{{ $tool->condition === 'baik' ? 'Tersedia' : 'Perlu Pemeriksaan' }}</strong></span>
                                     <button type="button" 
-                                            wire:click="$set('borrowTool', '{{ $tool['name'] }}')" 
+                                            wire:click="selectInventory({{ $tool->id }})"
                                             class="text-xs font-mono text-brand-orange hover:underline font-bold cursor-pointer">
                                         Pilih Alat →
                                     </button>

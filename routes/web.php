@@ -2,14 +2,19 @@
 
 use App\Http\Controllers\Public\AboutController;
 use App\Http\Controllers\Public\HomeController;
+use App\Http\Controllers\Public\AssetDownloadController;
+use App\Http\Controllers\Public\OperationsController;
 use App\Http\Controllers\App\DashboardController;
 use App\Http\Controllers\App\ManagementController;
 use App\Http\Controllers\App\CashController;
+use App\Models\CashTransaction;
+use App\Models\Member;
 use App\Livewire\Public\ProgramIndex;
 use App\Livewire\Public\ServiceHub;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\URL;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,6 +31,7 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/tentang', [AboutController::class, 'index'])->name('about');
 Route::get('/kegiatan', ProgramIndex::class)->name('programs.index');
 Route::get('/layanan', ServiceHub::class)->name('services.hub');
+Route::get('/aset/{asset}/unduh', AssetDownloadController::class)->name('assets.download');
 
 /*
 |--------------------------------------------------------------------------
@@ -55,25 +61,45 @@ Route::post('/logout', function (Request $request) {
     return redirect()->route('home');
 })->name('logout');
 
-Route::middleware('auth')->prefix('app')->as('app.')->group(function () {
+Route::middleware(['auth', 'can:manage-command-center'])->prefix('app')->as('app.')->group(function () {
     Route::get('/', DashboardController::class)->name('dashboard');
     Route::get('/anggota', [ManagementController::class, 'index'])->defaults('module', 'members')->name('members.index');
     Route::post('/anggota', [ManagementController::class, 'store'])->defaults('module', 'members')->name('members.store');
     Route::get('/program-kerja', [ManagementController::class, 'index'])->defaults('module', 'programs')->name('programs.index');
     Route::post('/program-kerja', [ManagementController::class, 'store'])->defaults('module', 'programs')->name('programs.store');
-    Route::view('/peminjaman', 'app.module', ['module' => 'Inventaris & Peminjaman'])->name('borrowings.index');
-    Route::view('/aspirasi', 'app.module', ['module' => 'Aspirasi Mahasiswa'])->name('aspirations.index');
-    Route::get('/presensi', [ManagementController::class, 'index'])->defaults('module', 'attendance')->name('attendance.index');
-    Route::post('/presensi', [ManagementController::class, 'store'])->defaults('module', 'attendance')->name('attendance.store');
+    Route::get('/peminjaman', [OperationsController::class, 'index'])->defaults('module', 'borrowings')->name('borrowings.index');
+    Route::get('/aspirasi', [OperationsController::class, 'index'])->defaults('module', 'aspirations')->name('aspirations.index');
+    Route::get('/presensi', [OperationsController::class, 'index'])->defaults('module', 'attendance')->name('attendance.index');
+    Route::post('/presensi', [OperationsController::class, 'store'])->defaults('module', 'attendance')->name('attendance.store');
     Route::get('/kas', [CashController::class, 'index'])->name('cash.index');
     Route::post('/kas', [CashController::class, 'store'])->name('cash.store');
     Route::post('/kas/{transaction}/void', [CashController::class, 'void'])->name('cash.void');
     Route::get('/inventaris', [ManagementController::class, 'index'])->defaults('module', 'inventory')->name('inventory.index');
     Route::post('/inventaris', [ManagementController::class, 'store'])->defaults('module', 'inventory')->name('inventory.store');
-    Route::get('/surat', [ManagementController::class, 'index'])->defaults('module', 'letters')->name('letters.index');
-    Route::post('/surat', [ManagementController::class, 'store'])->defaults('module', 'letters')->name('letters.store');
+    Route::get('/surat', [OperationsController::class, 'index'])->defaults('module', 'letters')->name('letters.index');
+    Route::post('/surat', [OperationsController::class, 'store'])->defaults('module', 'letters')->name('letters.store');
     Route::get('/notulensi', [ManagementController::class, 'index'])->defaults('module', 'meeting-notes')->name('meeting-notes.index');
     Route::post('/notulensi', [ManagementController::class, 'store'])->defaults('module', 'meeting-notes')->name('meeting-notes.store');
-    Route::get('/aset', [ManagementController::class, 'index'])->defaults('module', 'assets')->name('assets.index');
-    Route::post('/aset', [ManagementController::class, 'store'])->defaults('module', 'assets')->name('assets.store');
+    Route::get('/aset', [OperationsController::class, 'index'])->defaults('module', 'assets')->name('assets.index');
+    Route::post('/aset', [OperationsController::class, 'store'])->defaults('module', 'assets')->name('assets.store');
+    Route::get('/operasional/{module}', [OperationsController::class, 'index'])->whereIn('module', ['borrowings','aspirations','attendance','letters','assets','committees','periods','admins','receipts'])->name('operations.index');
+    Route::post('/operasional/{module}', [OperationsController::class, 'store'])->whereIn('module', ['attendance','letters','assets','committees','periods','admins'])->name('operations.store');
+    Route::post('/operasional/{module}/{id}', [OperationsController::class, 'operate'])->whereIn('module', ['borrowings','aspirations','attendance','receipts'])->name('operations.operate');
+    Route::get('/operasional/{module}/{id}/unduh', [OperationsController::class, 'download'])->whereIn('module', ['letters','assets','receipts'])->middleware('signed')->name('operations.download');
+    Route::get('/ekspor/anggota.csv', function () {
+        return response()->streamDownload(function (): void {
+            $out = fopen('php://output', 'w');
+            fputcsv($out, ['Nama', 'NIM', 'Jabatan', 'Angkatan']);
+            Member::query()->orderBy('name')->each(fn (Member $member) => fputcsv($out, [$member->name, $member->nim, $member->position, $member->batch]));
+            fclose($out);
+        }, 'anggota-hmts.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+    })->name('exports.members');
+    Route::get('/ekspor/kas.csv', function () {
+        return response()->streamDownload(function (): void {
+            $out = fopen('php://output', 'w');
+            fputcsv($out, ['Waktu', 'Akun', 'Jenis', 'Nominal', 'Status', 'Keterangan']);
+            CashTransaction::query()->with('cashAccount')->orderBy('transacted_at')->each(fn (CashTransaction $transaction) => fputcsv($out, [$transaction->transacted_at->format('Y-m-d H:i:s'), $transaction->cashAccount->name, $transaction->type, $transaction->amount, $transaction->status, $transaction->description]));
+            fclose($out);
+        }, 'kas-hmts.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+    })->name('exports.cash');
 });
