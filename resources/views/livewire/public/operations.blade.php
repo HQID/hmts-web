@@ -81,7 +81,7 @@
         </div>
     @endif
 
-    <div class="grid gap-6 {{ empty($definition['rules']) ? '' : 'xl:grid-cols-[.8fr_1.2fr]' }}">
+    <div class="space-y-6 min-w-0">
         @if(!empty($definition['rules']))
         <section class="clean-card p-6">
             <div class="flex items-center gap-2 mb-1">

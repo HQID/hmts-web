@@ -521,7 +521,7 @@
             ];
         @endphp
 
-        <div class="grid gap-6 xl:grid-cols-[.9fr_1.1fr] min-w-0">
+        <div class="space-y-6 min-w-0">
             <section class="clean-card p-6 min-w-0 overflow-hidden">
                 <div class="mb-4 pb-3 border-b border-white/10 flex items-center justify-between">
                     <div>

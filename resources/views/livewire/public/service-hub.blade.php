@@ -1,40 +1,40 @@
 <div>
-    <!-- HEADER LAYANAN MAHASISWA -->
-    <section class="pt-10 pb-12 px-4 sm:px-6 lg:px-8 border-b border-white/10">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-4">
+    <!-- HEADER LAYANAN MAHASISWA (KOMPAK UNTUK VIEWPORT LAPTOP 150%) -->
+    <section class="pt-4 sm:pt-6 pb-4 sm:pb-5 px-4 sm:px-6 lg:px-8 border-b border-white/10">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-4 animate-hero-slide animate-delay-75">
             <div>
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-zinc-300 mb-4">
+                <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-zinc-300 mb-2">
                     <span class="w-1.5 h-1.5 rounded-full bg-brand-yellow"></span>
                     <span>One-Stop Student Hub</span>
                 </div>
-                <h1 class="font-display font-black text-3xl sm:text-5xl text-white uppercase tracking-tight mb-2">
+                <h1 class="font-display font-black text-2xl sm:text-3xl lg:text-[38px] leading-tight text-white uppercase tracking-tight mb-1">
                     Pusat <span class="text-brand-yellow">Layanan Mahasiswa</span>
                 </h1>
-                <p class="text-zinc-300 text-sm max-w-xl font-sans">
+                <p class="text-zinc-300 text-xs sm:text-sm max-w-xl font-sans">
                     Fasilitas utilitas digital mandiri: peminjaman alat lab, absensi acara via QR, kanal aspirasi anonim, dan repositori arsip.
                 </p>
             </div>
 
             <!-- Tab Pills Navigasi Cepat -->
-            <div class="flex flex-wrap items-center gap-2 p-1.5 rounded-2xl bg-[#121217] border border-white/10 font-mono text-xs">
+            <div class="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-[#121217] border border-white/10 font-mono text-xs">
                 <button type="button" 
                         wire:click="setTab('borrow')" 
-                        class="px-4 py-2 rounded-xl transition-all cursor-pointer {{ $activeTab === 'borrow' ? 'bg-brand-orange text-white font-bold shadow-md' : 'text-zinc-400 hover:text-white' }}">
+                        class="px-3.5 py-1.5 rounded-lg transition-all active:scale-[0.98] cursor-pointer {{ $activeTab === 'borrow' ? 'bg-brand-orange text-white font-bold shadow-md' : 'text-zinc-400 hover:text-white' }}">
                     Pinjam Alat Lab
                 </button>
                 <button type="button" 
                         wire:click="setTab('qr')" 
-                        class="px-4 py-2 rounded-xl transition-all cursor-pointer {{ $activeTab === 'qr' ? 'bg-brand-orange text-white font-bold shadow-md' : 'text-zinc-400 hover:text-white' }}">
+                        class="px-3.5 py-1.5 rounded-lg transition-all active:scale-[0.98] cursor-pointer {{ $activeTab === 'qr' ? 'bg-brand-orange text-white font-bold shadow-md' : 'text-zinc-400 hover:text-white' }}">
                     Presensi QR
                 </button>
                 <button type="button" 
                         wire:click="setTab('aspiration')" 
-                        class="px-4 py-2 rounded-xl transition-all cursor-pointer {{ $activeTab === 'aspiration' ? 'bg-brand-orange text-white font-bold shadow-md' : 'text-zinc-400 hover:text-white' }}">
+                        class="px-3.5 py-1.5 rounded-lg transition-all active:scale-[0.98] cursor-pointer {{ $activeTab === 'aspiration' ? 'bg-brand-orange text-white font-bold shadow-md' : 'text-zinc-400 hover:text-white' }}">
                     Kotak Aspirasi
                 </button>
                 <button type="button" 
                         wire:click="setTab('assets')" 
-                        class="px-4 py-2 rounded-xl transition-all cursor-pointer {{ $activeTab === 'assets' ? 'bg-brand-orange text-white font-bold shadow-md' : 'text-zinc-400 hover:text-white' }}">
+                        class="px-3.5 py-1.5 rounded-lg transition-all active:scale-[0.98] cursor-pointer {{ $activeTab === 'assets' ? 'bg-brand-orange text-white font-bold shadow-md' : 'text-zinc-400 hover:text-white' }}">
                     Bank Aset
                 </button>
             </div>
@@ -42,35 +42,35 @@
     </section>
 
     <!-- CONTENT VIEW BERDASARKAN ACTIVE TAB -->
-    <section class="py-12 px-4 sm:px-6 lg:px-8">
+    <section class="pt-5 sm:pt-6 pb-12 px-4 sm:px-6 lg:px-8">
         <div class="max-w-7xl mx-auto">
 
             <!-- ============================================================ -->
             <!-- TAB 1: PEMINJAMAN ALAT LAB -->
             <!-- ============================================================ -->
             @if ($activeTab === 'borrow')
-                <div class="space-y-10">
-                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-white/10">
+                <div class="space-y-6 tab-content-enter">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 pb-3 border-b border-white/10">
                         <div>
                             <span class="text-brand-yellow font-mono text-xs font-semibold uppercase block">Inventaris Alat Ukur & Laboratorium</span>
-                            <h3 class="font-display font-bold text-2xl text-white uppercase">Katalog Alat Tersedia</h3>
+                            <h3 class="font-display font-bold text-lg sm:text-xl text-white uppercase">Katalog Alat Tersedia</h3>
                         </div>
                         <span class="text-xs font-mono text-zinc-400">Verifikasi peminjaman maksimal 1x24 jam kerja</span>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        @foreach ($tools as $tool)
-                            <div class="clean-card p-5 flex flex-col justify-between group">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        @foreach ($tools as $index => $tool)
+                            <div class="clean-card p-4 flex flex-col justify-between group motion-reveal delay-{{ (($index % 4) + 1) * 75 }}">
                                 <div>
-                                    <div class="h-40 rounded-xl overflow-hidden bg-black/40 mb-4 border border-white/5 relative">
+                                    <div class="h-32 sm:h-36 rounded-xl overflow-hidden bg-black/40 mb-3 border border-white/5 relative">
                                         <div class="flex h-full items-center justify-center font-mono text-xs text-zinc-500">{{ $tool->code }}</div>
-                                        <span class="absolute top-2 right-2 px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-mono">
+                                        <span class="absolute top-2 right-2 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-mono">
                                             {{ $tool->available_qty }} Unit Tersedia
                                         </span>
                                     </div>
                                     <span class="text-[10px] font-mono text-brand-yellow uppercase block">{{ $tool->category }}</span>
-                                    <h4 class="font-display font-bold text-base text-white mt-1 mb-2">{{ $tool->name }}</h4>
-                                    <p class="text-xs text-zinc-400 font-sans leading-relaxed">{{ $tool->specification }}</p>
+                                    <h4 class="font-display font-bold text-sm sm:text-base text-white mt-1 mb-1.5">{{ $tool->name }}</h4>
+                                    <p class="text-xs text-zinc-400 font-sans leading-relaxed line-clamp-2">{{ $tool->specification }}</p>
                                 </div>
 
                                 <div class="mt-5 pt-3 border-t border-white/10 flex items-center justify-between">
@@ -153,7 +153,7 @@
             <!-- TAB 2: PRESENSI QR -->
             <!-- ============================================================ -->
             @if ($activeTab === 'qr')
-                <div class="max-w-2xl mx-auto clean-card p-6 sm:p-10 text-center">
+                <div class="max-w-2xl mx-auto clean-card p-6 sm:p-10 text-center tab-content-enter">
                     <span class="text-brand-yellow font-mono text-xs font-semibold uppercase block mb-1">Presensi Mandiri QR Code</span>
                     <h3 class="font-display font-bold text-2xl text-white uppercase mb-6">Scan QR & Token Sesi Acara</h3>
 
@@ -184,7 +184,7 @@
                             @error('qrToken') <span class="text-red-400 text-[10px]">{{ $message }}</span> @enderror
                         </div>
 
-                        <button type="submit" class="w-full bg-brand-orange hover:bg-brand-orangeHover text-white py-3 rounded-full font-bold uppercase tracking-wider transition-all shadow-md shadow-brand-orange/20 cursor-pointer">
+                        <button type="submit" class="w-full bg-brand-orange hover:bg-brand-orangeHover text-white py-3 rounded-full font-bold uppercase tracking-wider transition-all shadow-md shadow-brand-orange/20 cursor-pointer active:scale-[0.98]">
                             Validasi Presensi Sekarang ↗
                         </button>
                     </form>
@@ -195,7 +195,7 @@
             <!-- TAB 3: KOTAK ASPIRASI MAHASISWA -->
             <!-- ============================================================ -->
             @if ($activeTab === 'aspiration')
-                <div class="max-w-3xl mx-auto space-y-8">
+                <div class="max-w-3xl mx-auto space-y-8 tab-content-enter">
                     <!-- Penjelasan Privasi -->
                     <div class="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs font-mono text-amber-300 flex items-start gap-3">
                         <span class="text-lg">🛡️</span>
@@ -239,7 +239,7 @@
                                     @error('aspirationMessage') <span class="text-red-400 text-[10px]">{{ $message }}</span> @enderror
                                 </div>
 
-                                <button type="submit" class="bg-brand-orange hover:bg-brand-orangeHover text-white px-6 py-3 rounded-full font-bold uppercase tracking-wider transition-all shadow-md shadow-brand-orange/20 cursor-pointer">
+                                <button type="submit" class="bg-brand-orange hover:bg-brand-orangeHover text-white px-6 py-3 rounded-full font-bold uppercase tracking-wider transition-all shadow-md shadow-brand-orange/20 cursor-pointer active:scale-[0.98]">
                                     Kirimkan Aspirasi (Anonim) ↗
                                 </button>
                             </form>
@@ -253,7 +253,7 @@
 
                         <div class="flex flex-col sm:flex-row gap-2 font-mono text-xs">
                             <input type="text" wire:model="trackTicketInput" placeholder="Masukkan Kode Tiket (misal: ASP-2026-XXXXX)" class="flex-1 bg-[#181822] border border-white/10 rounded-xl px-4 py-2.5 text-white outline-none">
-                            <button type="button" wire:click="searchTicket" class="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold cursor-pointer">
+                            <button type="button" wire:click="searchTicket" class="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold cursor-pointer active:scale-[0.98]">
                                 Lacak Tiket →
                             </button>
                         </div>
@@ -275,7 +275,7 @@
             <!-- TAB 4: BANK ASET & REPOSITORI -->
             <!-- ============================================================ -->
             @if ($activeTab === 'assets')
-                <div class="space-y-6">
+                <div class="space-y-6 tab-content-enter">
                     <div class="pb-4 border-b border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div>
                             <span class="text-brand-yellow font-mono text-xs font-semibold uppercase block">Open Repository</span>
@@ -285,7 +285,7 @@
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                        <div class="clean-card p-5 flex flex-col justify-between">
+                        <div class="clean-card p-5 flex flex-col justify-between motion-reveal delay-75">
                             <div>
                                 <span class="text-[10px] font-mono text-brand-yellow uppercase block mb-1">Identitas Visual</span>
                                 <h4 class="font-display font-bold text-base text-white mb-2">Master Logo Kit & Kop Surat</h4>
@@ -297,7 +297,7 @@
                             </div>
                         </div>
 
-                        <div class="clean-card p-5 flex flex-col justify-between">
+                        <div class="clean-card p-5 flex flex-col justify-between motion-reveal delay-150">
                             <div>
                                 <span class="text-[10px] font-mono text-brand-yellow uppercase block mb-1">CAD Blueprint</span>
                                 <h4 class="font-display font-bold text-base text-white mb-2">Blueprint CAD Jembatan Busur 60m</h4>
@@ -309,7 +309,7 @@
                             </div>
                         </div>
 
-                        <div class="clean-card p-5 flex flex-col justify-between">
+                        <div class="clean-card p-5 flex flex-col justify-between motion-reveal delay-225">
                             <div>
                                 <span class="text-[10px] font-mono text-brand-yellow uppercase block mb-1">Publikasi Ilmiah</span>
                                 <h4 class="font-display font-bold text-base text-white mb-2">Paper Jurnal Inovasi Beton Serat</h4>
@@ -321,7 +321,7 @@
                             </div>
                         </div>
 
-                        <div class="clean-card p-5 flex flex-col justify-between">
+                        <div class="clean-card p-5 flex flex-col justify-between motion-reveal delay-300">
                             <div>
                                 <span class="text-[10px] font-mono text-brand-yellow uppercase block mb-1">Pedoman Praktikum</span>
                                 <h4 class="font-display font-bold text-base text-white mb-2">Modul Praktikum Survei & Pemetaan</h4>

@@ -12,21 +12,60 @@
 <body class="ambient-canvas min-h-[100dvh] font-sans text-zinc-200">
     <div class="min-h-[100dvh] lg:grid lg:grid-cols-[280px_1fr]">
 
-        <!-- SIDEBAR COMMAND CENTER -->
-        <aside class="border-b border-white/10 bg-[#0d0d12]/95 backdrop-blur-xl lg:h-screen lg:sticky lg:top-0 lg:border-r lg:border-b-0 flex flex-col justify-between overflow-y-auto no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <!-- MOBILE TOP BAR (STICKY) -->
+        <header class="lg:hidden sticky top-0 z-30 bg-[#0d0d12]/95 backdrop-blur-xl border-b border-white/10 px-4 py-3 flex items-center justify-between gap-3 shadow-lg">
+            <a href="{{ route('app.dashboard') }}" class="flex items-center gap-2.5 min-w-0">
+                <img src="{{ asset('images/hmts.png') }}" alt="HMTS FT-UNTAD" class="h-8 w-8 object-contain drop-shadow shrink-0">
+                <div class="min-w-0">
+                    <span class="font-display text-xs font-bold text-white tracking-wide block truncate">COMMAND CENTER</span>
+                    <div class="flex items-center gap-1.5 mt-0.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+                        <span class="font-mono text-[9px] text-zinc-400 uppercase tracking-wider truncate">HMTS FT-UNTAD</span>
+                    </div>
+                </div>
+            </a>
+
+            <button type="button" 
+                    id="mobile-sidebar-open-btn" 
+                    class="p-2 rounded-xl bg-white/5 border border-white/10 text-zinc-300 hover:text-white hover:bg-white/10 transition-colors shrink-0 cursor-pointer"
+                    aria-label="Buka Menu Navigasi">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+        </header>
+
+        <!-- BACKDROP OVERLAY UNTUK MOBILE DRAWER -->
+        <div id="mobile-sidebar-backdrop" 
+             class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden transition-opacity duration-300 opacity-0 lg:hidden cursor-pointer"
+             aria-hidden="true"></div>
+
+        <!-- SIDEBAR COMMAND CENTER (DRAWER DI MOBILE, STATIC/STICKY DI DESKTOP) -->
+        <aside id="sidebar-drawer" 
+               class="fixed inset-y-0 left-0 z-50 w-[280px] -translate-x-full transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:h-screen lg:sticky lg:top-0 border-r border-white/10 bg-[#0d0d12] lg:bg-[#0d0d12]/95 backdrop-blur-xl flex flex-col justify-between overflow-y-auto no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden shadow-2xl lg:shadow-none">
             <div class="overflow-y-auto no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                 <!-- Header Branding Sidebar -->
-                <div class="p-5 border-b border-white/5">
-                    <a href="{{ route('app.dashboard') }}" class="flex items-center gap-3 group">
-                        <img src="{{ asset('images/hmts.png') }}" alt="HMTS FT-UNTAD" class="h-10 w-10 object-contain drop-shadow">
-                        <div>
-                            <span class="font-display text-sm font-bold text-white tracking-wide block group-hover:text-brand-yellow transition-colors">COMMAND CENTER</span>
+                <div class="p-5 border-b border-white/5 flex items-center justify-between gap-3">
+                    <a href="{{ route('app.dashboard') }}" class="flex items-center gap-3 group min-w-0">
+                        <img src="{{ asset('images/hmts.png') }}" alt="HMTS FT-UNTAD" class="h-10 w-10 object-contain drop-shadow shrink-0">
+                        <div class="min-w-0">
+                            <span class="font-display text-sm font-bold text-white tracking-wide block group-hover:text-brand-yellow transition-colors truncate">COMMAND CENTER</span>
                             <div class="flex items-center gap-1.5 mt-0.5">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                                <span class="font-mono text-[10px] text-zinc-400 uppercase tracking-wider">HMTS FT-UNTAD</span>
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+                                <span class="font-mono text-[10px] text-zinc-400 uppercase tracking-wider truncate">HMTS FT-UNTAD</span>
                             </div>
                         </div>
                     </a>
+
+                    <!-- Tombol Tutup Khusus Mobile -->
+                    <button type="button" 
+                            id="mobile-sidebar-close-btn" 
+                            class="lg:hidden p-1.5 rounded-xl bg-white/5 border border-white/10 text-zinc-400 hover:text-white hover:bg-white/10 transition-colors shrink-0 cursor-pointer"
+                            aria-label="Tutup Menu Navigasi">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
                 </div>
 
                 @php
@@ -244,6 +283,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // Sidebar Navigation Group Persistence
             document.querySelectorAll('details[data-nav-group]').forEach(el => {
                 const key = 'sidebar_nav_' + el.getAttribute('data-nav-group');
                 const saved = localStorage.getItem(key);
@@ -257,6 +297,58 @@
                     localStorage.setItem(key, el.open);
                 });
             });
+
+            // Mobile Sidebar Drawer Functionality
+            const drawer = document.getElementById('sidebar-drawer');
+            const backdrop = document.getElementById('mobile-sidebar-backdrop');
+            const openBtn = document.getElementById('mobile-sidebar-open-btn');
+            const closeBtn = document.getElementById('mobile-sidebar-close-btn');
+
+            function openSidebar() {
+                if (!drawer || !backdrop) return;
+                backdrop.classList.remove('hidden');
+                requestAnimationFrame(() => {
+                    backdrop.classList.remove('opacity-0');
+                    backdrop.classList.add('opacity-100');
+                    drawer.classList.remove('-translate-x-full');
+                });
+                document.body.classList.add('overflow-hidden', 'lg:overflow-auto');
+            }
+
+            function closeSidebar() {
+                if (!drawer || !backdrop) return;
+                backdrop.classList.remove('opacity-100');
+                backdrop.classList.add('opacity-0');
+                drawer.classList.add('-translate-x-full');
+                setTimeout(() => {
+                    if (drawer.classList.contains('-translate-x-full')) {
+                        backdrop.classList.add('hidden');
+                    }
+                }, 300);
+                document.body.classList.remove('overflow-hidden', 'lg:overflow-auto');
+            }
+
+            if (openBtn) openBtn.addEventListener('click', openSidebar);
+            if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+            if (backdrop) backdrop.addEventListener('click', closeSidebar);
+
+            // Close on escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && drawer && !drawer.classList.contains('-translate-x-full') && window.innerWidth < 1024) {
+                    closeSidebar();
+                }
+            });
+
+            // Close on clicking nav links on mobile
+            if (drawer) {
+                drawer.querySelectorAll('nav a').forEach(link => {
+                    link.addEventListener('click', () => {
+                        if (window.innerWidth < 1024) {
+                            closeSidebar();
+                        }
+                    });
+                });
+            }
         });
     </script>
 </body>

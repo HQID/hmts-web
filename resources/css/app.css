@@ -39,12 +39,15 @@ input, select, textarea {
     -webkit-backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 1rem;
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .clean-card:hover {
-    border-color: rgba(255, 255, 255, 0.18);
-    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.22);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px -10px rgba(0, 0, 0, 0.6);
 }
 
 .clean-card-active {
@@ -52,6 +55,13 @@ input, select, textarea {
     border: 1px solid #FFE500;
     border-radius: 1rem;
     box-shadow: 0 0 25px rgba(255, 229, 0, 0.12);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.clean-card-active:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0 30px rgba(255, 229, 0, 0.2);
 }
 
 /* Sembunyikan scrollbar namun tetap dapat di-scroll secara halus */
@@ -61,4 +71,193 @@ input, select, textarea {
 .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
+}
+
+/* ==========================================================================
+   ENGINEERING MOTION SYSTEM (PERFORMANCE FIRST - GPU COMPOSITED)
+   ========================================================================== */
+
+/* 1. Page-Load CSS Hero Entrance Animations (Runs immediately, zero JS latency) */
+@keyframes heroSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(26px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes heroScaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.92) translateY(18px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.animate-hero-slide {
+    animation: heroSlideUp 0.85s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+    will-change: opacity, transform;
+}
+
+.animate-hero-scale {
+    animation: heroScaleIn 0.95s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+    will-change: opacity, transform;
+}
+
+.animate-delay-75  { animation-delay: 75ms; }
+.animate-delay-100 { animation-delay: 100ms; }
+.animate-delay-150 { animation-delay: 150ms; }
+.animate-delay-200 { animation-delay: 200ms; }
+.animate-delay-250 { animation-delay: 250ms; }
+.animate-delay-300 { animation-delay: 300ms; }
+.animate-delay-350 { animation-delay: 350ms; }
+.animate-delay-400 { animation-delay: 400ms; }
+.animate-delay-500 { animation-delay: 500ms; }
+
+/* 2. Emblem Subtle Floating Oscillation */
+@keyframes emblemFloat {
+    0%, 100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-8px) rotate(0.4deg);
+    }
+}
+
+.animate-emblem-float {
+    animation: emblemFloat 6s ease-in-out infinite;
+    will-change: transform;
+}
+
+/* 3. Infinite Smooth Marquee Ticker */
+.marquee-wrapper {
+    display: flex;
+    overflow: hidden;
+    user-select: none;
+    mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+}
+
+.marquee-track {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 2.5rem;
+    padding-right: 2.5rem;
+    animation: marqueeScroll 26s linear infinite;
+    will-change: transform;
+}
+
+.marquee-wrapper:hover .marquee-track {
+    animation-play-state: paused;
+}
+
+@keyframes marqueeScroll {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(-100%);
+    }
+}
+
+/* 4. Kinetic Viewport Scroll Reveal */
+.motion-reveal {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+}
+
+.motion-reveal.is-revealed {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.motion-scale {
+    opacity: 0;
+    transform: scale(0.96) translateY(14px);
+    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+}
+
+.motion-scale.is-revealed {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+}
+
+/* Stagger Delays for Harmonic Rhythm */
+.delay-75 { transition-delay: 75ms; }
+.delay-100 { transition-delay: 100ms; }
+.delay-150 { transition-delay: 150ms; }
+.delay-200 { transition-delay: 200ms; }
+.delay-225 { transition-delay: 225ms; }
+.delay-300 { transition-delay: 300ms; }
+.delay-375 { transition-delay: 375ms; }
+.delay-450 { transition-delay: 450ms; }
+
+/* 5. Ambient Lighting Pulse */
+@keyframes ambientGlowPulse {
+    0%, 100% {
+        opacity: 0.55;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.85;
+        transform: scale(1.08);
+    }
+}
+
+.animate-ambient-glow {
+    animation: ambientGlowPulse 6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    transform-origin: center;
+}
+
+/* 6. Subtle Shimmer for Badges */
+@keyframes badgeShimmer {
+    0% {
+        transform: translateX(-150%);
+    }
+    35%, 100% {
+        transform: translateX(180%);
+    }
+}
+
+.badge-shimmer-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.badge-shimmer-container::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-150%);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22), transparent);
+    animation: badgeShimmer 4.5s ease-in-out infinite;
+    pointer-events: none;
+}
+
+/* 7. Smooth Tab & Modal Fade */
+@keyframes gentleFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.tab-content-enter {
+    animation: gentleFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }

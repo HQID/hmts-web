@@ -1,27 +1,27 @@
 <x-layouts.public title="Tentang Kami | HMTS FT-UNTAD">
 
-    <!-- HEADER / HERO SECTION TENTANG KAMI -->
-    <section class="pt-10 pb-12 px-4 sm:px-6 lg:px-8 border-b border-white/10">
-        <div class="max-w-7xl mx-auto">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-zinc-300 mb-4">
+    <!-- HEADER / HERO SECTION TENTANG KAMI (KOMPAK UNTUK VIEWPORT LAPTOP 150%) -->
+    <section class="pt-4 sm:pt-6 pb-4 sm:pb-5 px-4 sm:px-6 lg:px-8 border-b border-white/10">
+        <div class="max-w-7xl mx-auto animate-hero-slide animate-delay-75">
+            <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-zinc-300 mb-2">
                 <span class="w-1.5 h-1.5 rounded-full bg-brand-yellow"></span>
                 <span>Profil Organisasi</span>
             </div>
-            <h1 class="font-display font-black text-3xl sm:text-5xl text-white uppercase tracking-tight mb-3">
+            <h1 class="font-display font-black text-2xl sm:text-3xl lg:text-4xl text-white uppercase tracking-tight mb-1.5">
                 Sejarah, Visi Misi, & <span class="text-brand-yellow">Struktur Pengurus</span>
             </h1>
-            <p class="text-zinc-300 text-sm sm:text-base max-w-2xl leading-relaxed font-sans">
+            <p class="text-zinc-300 text-xs sm:text-sm max-w-2xl leading-relaxed font-sans">
                 Mengenal tonggak sejarah, prinsip nilai perjuangan, dan susunan kepengurusan HMTS FT-UNTAD Periode {{ $periodName }}.
             </p>
         </div>
     </section>
 
     <!-- 1. SEJARAH & LOGO RESMI -->
-    <section class="py-16 px-4 sm:px-6 lg:px-8">
+    <section class="pt-6 pb-12 px-4 sm:px-6 lg:px-8">
         <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
 
             <!-- Sejarah Singkat -->
-            <div class="lg:col-span-7 clean-card p-6 sm:p-8 flex flex-col justify-between">
+            <div class="lg:col-span-7 clean-card p-6 sm:p-8 flex flex-col justify-between motion-reveal delay-75">
                 <div>
                     <span class="text-brand-yellow font-mono text-xs font-semibold uppercase block mb-2">Lintas Sejarah</span>
                     <h3 class="font-display font-bold text-xl text-white uppercase mb-4">Sejarah Singkat HMTS FT-UNTAD</h3>
@@ -44,10 +44,10 @@
             </div>
 
             <!-- Logo Resmi HMTS FT-UNTAD (Full Logo Saja) -->
-            <div class="lg:col-span-5 clean-card p-6 sm:p-8 flex flex-col items-center justify-center text-center relative overflow-hidden group">
-                <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-brand-yellow/10 via-transparent to-transparent opacity-70 pointer-events-none"></div>
+            <div class="lg:col-span-5 clean-card p-6 sm:p-8 flex flex-col items-center justify-center text-center relative overflow-hidden group animate-hero-scale animate-delay-150">
+                <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-brand-yellow/15 via-transparent to-transparent opacity-70 pointer-events-none animate-ambient-glow"></div>
                 <div class="relative z-10 flex flex-col items-center justify-center py-4">
-                    <div class="p-6 sm:p-8 rounded-3xl bg-black/40 border border-white/10 shadow-2xl backdrop-blur-sm group-hover:border-brand-yellow/30 transition-all duration-300">
+                    <div class="p-6 sm:p-8 rounded-3xl bg-black/40 border border-white/10 shadow-2xl backdrop-blur-sm group-hover:border-brand-yellow/30 transition-all duration-300 animate-emblem-float">
                         <img src="{{ asset('images/hmts.png') }}"
                              alt="Logo Resmi HMTS FT-UNTAD"
                              class="w-48 h-48 sm:w-56 sm:h-56 object-contain drop-shadow-[0_15px_30px_rgba(255,229,0,0.18)] group-hover:scale-105 transition-transform duration-300">
@@ -72,7 +72,7 @@
     <!-- 2. VISI & MISI ORGANISASI -->
     <section class="py-16 px-4 sm:px-6 lg:px-8 border-t border-white/5 bg-[#0D0D12]/70 backdrop-blur-sm relative z-10">
         <div class="max-w-7xl mx-auto">
-            <div class="pb-4 mb-8 border-b border-white/10 flex flex-wrap items-center justify-between gap-4">
+            <div class="pb-4 mb-8 border-b border-white/10 flex flex-wrap items-center justify-between gap-4 motion-reveal">
                 <div>
                     <span class="text-brand-yellow font-mono text-xs font-semibold uppercase block mb-1">Arah Gerak Organisasi</span>
                     <h2 class="font-display font-black text-2xl sm:text-3xl text-white uppercase">Visi & Misi HMTS FT-UNTAD</h2>
@@ -84,7 +84,7 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
                 <!-- Visi Kami -->
-                <div class="lg:col-span-5 rounded-3xl bg-brand-yellow text-black p-6 sm:p-8 flex flex-col justify-between shadow-xl relative overflow-hidden">
+                <div class="lg:col-span-5 rounded-3xl bg-brand-yellow text-black p-6 sm:p-8 flex flex-col justify-between shadow-xl relative overflow-hidden motion-reveal delay-100">
                     <div class="relative z-10">
                         <div class="font-mono text-xs font-bold pb-3 mb-4 border-b border-black/20 flex justify-between">
                             <span>VISI KAMI</span>
@@ -101,7 +101,7 @@
                 </div>
 
                 <!-- Misi Kami (5 Poin Sesuai Gambar) -->
-                <div class="lg:col-span-7 space-y-3">
+                <div class="lg:col-span-7 space-y-3 motion-reveal delay-150">
                     <div class="clean-card p-4 sm:p-5 border-l-4 border-l-brand-yellow flex items-start gap-4 transition-all duration-200 hover:border-l-brand-orange">
                         <span class="font-mono text-brand-yellow font-bold text-base shrink-0 pt-0.5">1.</span>
                         <p class="text-xs sm:text-sm text-zinc-200 leading-relaxed font-sans">
@@ -140,14 +140,14 @@
     <!-- 3. MARS HMTS FT-UNTAD -->
     <section class="py-16 px-4 sm:px-6 lg:px-8 border-t border-white/5">
         <div class="max-w-7xl mx-auto">
-            <div class="text-center max-w-2xl mx-auto mb-10">
+            <div class="text-center max-w-2xl mx-auto mb-10 motion-reveal">
                 <span class="text-brand-yellow font-mono text-xs font-semibold uppercase block mb-1">Lagu Perjuangan Organisasi</span>
                 <h2 class="font-display font-black text-2xl sm:text-3xl text-white uppercase">Mars HMTS FT-UNTAD</h2>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                 <!-- Video Player YouTube Embedded -->
-                <div class="lg:col-span-5 flex flex-col items-center">
+                <div class="lg:col-span-5 flex flex-col items-center motion-reveal delay-100">
                     <div class="w-full aspect-video rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-black">
                         <iframe class="w-full h-full"
                                 src="https://www.youtube.com/embed/6A_Picg1NnE?rel=0"
@@ -174,7 +174,7 @@
                 </div>
 
                 <!-- Lirik Lengkap Mars HMTS (Sesuai Referensi Gambar 2) -->
-                <div class="lg:col-span-7">
+                <div class="lg:col-span-7 motion-reveal delay-200">
                     <div class="clean-card p-6 sm:p-8 sm:py-9 text-center space-y-5 rounded-3xl">
                         <!-- Bait 1 -->
                         <div class="space-y-1 text-xs sm:text-sm text-zinc-200 leading-relaxed font-sans">
@@ -222,7 +222,7 @@
     <section class="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 border-t border-white/5 bg-[#0D0D12]/70 backdrop-blur-sm relative z-10">
         <div class="max-w-7xl mx-auto">
 
-            <div class="text-center max-w-2xl mx-auto mb-12">
+            <div class="text-center max-w-2xl mx-auto mb-12 motion-reveal">
                 <span class="text-brand-yellow font-mono text-xs font-semibold uppercase block mb-1">Bagan Struktur Organisasi</span>
                 <h2 class="font-display font-black text-2xl sm:text-3xl text-white uppercase">Kepengurusan HMTS FT-UNTAD</h2>
                 <p class="text-xs font-mono text-zinc-400 mt-2">Periode {{ $periodName }} · Dewan Pimpinan Harian & Koordinator Divisi</p>
@@ -230,7 +230,7 @@
 
             <!-- TINGKAT 1: KETUA (Puncak Bagan - Ukuran Kartu Sesuai Tingkat BPH Dibawahnya) -->
             <div class="flex flex-col items-center mb-6">
-                <div class="clean-card w-full max-w-xs sm:w-[calc(50%-0.625rem)] lg:w-[calc(25%-0.9375rem)] p-4 sm:p-5 relative flex flex-col justify-between text-center items-center border-brand-yellow/60 shadow-2xl shadow-brand-yellow/5 rounded-3xl">
+                <div class="clean-card w-full max-w-xs sm:w-[calc(50%-0.625rem)] lg:w-[calc(25%-0.9375rem)] p-4 sm:p-5 relative flex flex-col justify-between text-center items-center border-brand-yellow/60 shadow-2xl shadow-brand-yellow/5 rounded-3xl motion-scale delay-75">
                     <div class="w-full flex flex-col items-center">
                         <!-- Foto Portrait Ketua (Ukuran & Aspek Sama dengan Kartu BPH & Koordinator) -->
                         <div class="relative w-full aspect-[3/4] overflow-hidden rounded-2xl border-2 border-brand-yellow/60 bg-[#14141E] shadow-lg shadow-black/60">
@@ -256,8 +256,8 @@
                 <div class="hidden lg:block absolute top-0 left-[12.5%] right-[12.5%] h-0.5 bg-white/20"></div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 pt-4">
-                    @foreach ($bphList as $bph)
-                        <div class="clean-card p-4 sm:p-5 relative flex flex-col justify-between text-center items-center rounded-3xl">
+                    @foreach ($bphList as $index => $bph)
+                        <div class="clean-card p-4 sm:p-5 relative flex flex-col justify-between text-center items-center rounded-3xl motion-reveal delay-{{ ($index + 1) * 75 }}">
                             <!-- Stem Vertikal Menghubungkan ke Garis Horizontal -->
                             <div class="hidden lg:block absolute -top-4 left-1/2 -translate-x-1/2 w-0.5 h-4 bg-white/20"></div>
                             <div class="w-full flex flex-col items-center">
@@ -280,7 +280,7 @@
             </div>
 
             <!-- Batang Penghubung ke Koordinator Divisi -->
-            <div class="flex flex-col items-center my-6">
+            <div class="flex flex-col items-center my-6 motion-reveal">
                 <div class="w-0.5 h-8 bg-white/20"></div>
                 <div class="px-5 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-brand-yellow font-semibold tracking-wider uppercase">
                     KOORDINATOR DIVISI
@@ -290,7 +290,7 @@
 
             <!-- TINGKAT 3: KOORDINATOR DIVISI (8 Divisi) -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                @foreach ($divisions as $division)
+                @foreach ($divisions as $index => $division)
                     @php
                         $coord = $division->coordinator ?? (object)[
                             'name' => 'Koordinator ' . $division->name,
@@ -299,7 +299,7 @@
                             'photo_url' => asset('images/members/placeholder.svg'),
                         ];
                     @endphp
-                    <div class="clean-card p-4 sm:p-5 flex flex-col justify-between rounded-3xl">
+                    <div class="clean-card p-4 sm:p-5 flex flex-col justify-between rounded-3xl motion-reveal delay-{{ (($index % 4) + 1) * 75 }}">
                         <div class="flex flex-col items-center">
                             <!-- Foto Portrait Koordinator Divisi -->
                             <div class="relative w-full aspect-[3/4] overflow-hidden rounded-2xl border border-white/10 bg-[#14141E] shadow-md shadow-black/40">

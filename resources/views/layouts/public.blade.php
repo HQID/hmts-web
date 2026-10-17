@@ -35,18 +35,18 @@
     <div class="relative z-10 flex flex-col min-h-screen">
         <!-- TOP MINIMAL UTILITY BAR -->
         <div class="border-b border-white/5 bg-[#0A0A0E]/80 backdrop-blur-sm text-xs font-mono text-zinc-400 py-1.5 px-4 sm:px-6 lg:px-8">
-            <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
-                <div class="flex items-center gap-3">
-                    <span class="inline-flex items-center gap-1.5 text-zinc-300">
+            <div class="max-w-7xl mx-auto flex items-center justify-between gap-3 min-w-0">
+                <div class="flex items-center gap-2 sm:gap-3 min-w-0 text-[11px] sm:text-xs">
+                    <span class="inline-flex items-center gap-1.5 text-zinc-300 font-semibold shrink-0">
                         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                         HMTS FT-UNTAD
                     </span>
-                    <span class="text-white/20">•</span>
-                    <span>Jurusan Teknik Sipil Universitas Tadulako</span>
+                    <span class="hidden sm:inline text-white/20">•</span>
+                    <span class="hidden sm:inline truncate">Jurusan Teknik Sipil Universitas Tadulako</span>
                     <span class="hidden md:inline text-white/20">•</span>
-                    <span class="hidden md:inline text-brand-yellow font-semibold">Akreditasi Unggul</span>
+                    <span class="hidden md:inline text-brand-yellow font-semibold shrink-0">Akreditasi Unggul</span>
                 </div>
-                <div class="hidden sm:flex items-center gap-4 text-[11px]">
+                <div class="hidden sm:flex items-center gap-4 text-[11px] shrink-0">
                     <span class="text-brand-yellow font-bold">#WeAreTheChampions</span>
                     <span class="text-white/20">•</span>
                     <span>Palu, Sulawesi Tengah (WITA)</span>
@@ -55,6 +55,9 @@
                         <span>Kotak Aspirasi Mahasiswa</span>
                         <span>↗</span>
                     </a>
+                </div>
+                <div class="sm:hidden text-[10px] text-brand-yellow font-semibold shrink-0">
+                    Akreditasi Unggul
                 </div>
             </div>
         </div>
