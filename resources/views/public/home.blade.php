@@ -226,51 +226,7 @@
         </div>
     </section>
 
-    <!-- 4. PROGRAM KERJA TERDEKAT (AGENDA TERPILIH) -->
-    <section class="py-16 sm:py-20 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-7xl mx-auto">
-            <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 mb-8 border-b border-white/10">
-                <div>
-                    <span class="text-brand-yellow font-mono text-xs font-semibold block mb-1">Agenda & Aksi</span>
-                    <h2 class="font-display font-black text-2xl sm:text-3xl text-white uppercase">Program Kerja Pilihan</h2>
-                </div>
-                <a href="{{ route('programs.index') }}" 
-                   class="inline-flex items-center gap-2 bg-brand-orange text-white px-5 py-2 rounded-full font-mono text-xs font-bold uppercase hover:bg-brand-orangeHover transition-colors shadow-md">
-                    <span>Lihat Semua Kegiatan</span>
-                    <span>↗</span>
-                </a>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                @foreach ($featuredPrograms as $program)
-                    <div class="clean-card overflow-hidden flex flex-col group">
-                        <div class="h-48 relative overflow-hidden bg-zinc-900">
-                            <img src="{{ $program['image'] }}" 
-                                 alt="{{ $program['title'] }}" 
-                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                            <div class="absolute inset-0 bg-gradient-to-t from-[#121217] via-transparent to-transparent"></div>
-                            <span class="absolute top-3 left-3 px-3 py-1 rounded-full bg-brand-orange text-white text-[10px] font-mono font-bold uppercase">
-                                {{ $program['badge'] }}
-                            </span>
-                        </div>
-                        <div class="p-6 flex-1 flex flex-col justify-between">
-                            <div>
-                                <div class="text-brand-yellow font-mono text-xs mb-1">{{ $program['category'] }}</div>
-                                <h4 class="font-display font-bold text-lg text-white mb-2">{{ $program['title'] }}</h4>
-                                <p class="text-xs text-zinc-400 leading-relaxed mb-4 font-sans">{{ $program['desc'] }}</p>
-                            </div>
-                            <div class="pt-4 border-t border-white/10 flex items-center justify-between text-xs font-mono text-zinc-400">
-                                <span>{{ $program['date'] }}</span>
-                                <a href="{{ route('programs.index') }}" class="text-brand-orange hover:underline font-bold">Detail ↗</a>
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    </section>
-
-    <!-- 5. AKSES MANDIRI MAHASISWA -->
+    <!-- 4. AKSES MANDIRI MAHASISWA -->
     <section class="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 border-t border-white/5 bg-[#0D0D12]/70 backdrop-blur-sm">
         <div class="max-w-7xl mx-auto">
             <div class="text-center max-w-2xl mx-auto mb-12">
@@ -366,18 +322,40 @@
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div class="p-3.5 rounded-2xl bg-black/40 border border-white/5">
-                                <span class="text-zinc-500 text-[11px] uppercase tracking-wider block mb-1">Email Resmi</span>
-                                <a href="mailto:sekretariat@hmts-untad.ac.id" class="text-white hover:text-brand-yellow font-sans text-xs font-semibold transition-colors truncate block">
-                                    sekretariat@hmts-untad.ac.id
-                                </a>
-                            </div>
-                            <div class="p-3.5 rounded-2xl bg-black/40 border border-white/5">
                                 <span class="text-zinc-500 text-[11px] uppercase tracking-wider block mb-1">Instagram</span>
-                                <a href="https://instagram.com/hmts_ftuntad" target="_blank" rel="noopener noreferrer" class="text-white hover:text-brand-orange font-sans text-xs font-semibold transition-colors flex items-center justify-between">
-                                    <span>@hmts_ftuntad</span>
+                                <a href="https://www.instagram.com/hmts.tadulako/" target="_blank" rel="noopener noreferrer" class="text-white hover:text-brand-orange font-sans text-xs font-semibold transition-colors flex items-center justify-between">
+                                    <span>@hmts.tadulako</span>
                                     <span class="text-brand-orange text-[11px]">↗</span>
                                 </a>
                             </div>
+                            <div class="p-3.5 rounded-2xl bg-black/40 border border-white/5">
+                                <span class="text-zinc-500 text-[11px] uppercase tracking-wider block mb-1">YouTube</span>
+                                <a href="https://youtube.com/@hmtstadulako?si=PJiOm9hgBSJuHWC3" target="_blank" rel="noopener noreferrer" class="text-white hover:text-brand-orange font-sans text-xs font-semibold transition-colors flex items-center justify-between">
+                                    <span>@hmtstadulako</span>
+                                    <span class="text-brand-orange text-[11px]">↗</span>
+                                </a>
+                            </div>
+                            <div class="p-3.5 rounded-2xl bg-black/40 border border-white/5">
+                                <span class="text-zinc-500 text-[11px] uppercase tracking-wider block mb-1">TikTok</span>
+                                <a href="https://www.tiktok.com/@hmts.tadulako?_t=ZS-8zkVbiC04jl&_r=1" target="_blank" rel="noopener noreferrer" class="text-white hover:text-brand-orange font-sans text-xs font-semibold transition-colors flex items-center justify-between">
+                                    <span>@hmts.tadulako</span>
+                                    <span class="text-brand-orange text-[11px]">↗</span>
+                                </a>
+                            </div>
+                            <div class="p-3.5 rounded-2xl bg-black/40 border border-white/5">
+                                <span class="text-zinc-500 text-[11px] uppercase tracking-wider block mb-1">X (Twitter)</span>
+                                <a href="https://x.com/hmtstadulako?s=21" target="_blank" rel="noopener noreferrer" class="text-white hover:text-brand-orange font-sans text-xs font-semibold transition-colors flex items-center justify-between">
+                                    <span>@hmtstadulako</span>
+                                    <span class="text-brand-orange text-[11px]">↗</span>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="p-3.5 rounded-2xl bg-black/40 border border-white/5">
+                            <span class="text-zinc-500 text-[11px] uppercase tracking-wider block mb-1">Email Resmi</span>
+                            <a href="mailto:sekretariat@hmts-untad.ac.id" class="text-white hover:text-brand-yellow font-sans text-xs font-semibold transition-colors truncate block">
+                                sekretariat@hmts-untad.ac.id
+                            </a>
                         </div>
                     </div>
 

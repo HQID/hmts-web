@@ -2,10 +2,13 @@
 
 namespace Database\Seeders;
 
+use App\Models\CashAccount;
 use App\Models\Division;
-use App\Models\Member;
 use App\Models\Inventory;
+use App\Models\MeetingNote;
+use App\Models\Member;
 use App\Models\Period;
+use App\Models\Program;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -63,48 +66,48 @@ class DatabaseSeeder extends Seeder
 
         $bphData = [
             [
-                'name' => 'M. Rayhan Pratama',
+                'name' => 'Muhammad Farhan Mubarak',
                 'nim' => 'F11122045',
                 'position' => 'Ketua',
-                'batch' => "'22",
+                'batch' => "'23",
                 'bio' => 'Penanggung jawab umum arah kebijakan & kepemimpinan organisasi',
-                'photo_path' => 'images/members/ketua.svg',
+                'photo_path' => 'images/members/ketua.png',
                 'sort_order' => 1,
             ],
             [
-                'name' => 'Dimas Arya Nugraha',
+                'name' => 'Kifli',
                 'nim' => 'F11122087',
                 'position' => 'Ketua 1',
-                'batch' => "'22",
+                'batch' => "'23",
                 'bio' => 'Koordinator bidang internal keorganisasian & sinkronisasi divisi',
-                'photo_path' => 'images/members/ketua1.svg',
+                'photo_path' => 'images/members/ketua1.png',
                 'sort_order' => 2,
             ],
             [
-                'name' => 'Fadel Muhammad',
+                'name' => 'Erzy',
                 'nim' => 'F11122103',
                 'position' => 'Ketua 2',
-                'batch' => "'22",
+                'batch' => "'23",
                 'bio' => 'Koordinator bidang eksternal, kemitraan lembaga, & keprofesian',
-                'photo_path' => 'images/members/ketua2.svg',
+                'photo_path' => 'images/members/ketua2.png',
                 'sort_order' => 3,
             ],
             [
-                'name' => 'Amanda Putri Lestari',
+                'name' => 'Indah',
                 'nim' => 'F11123014',
                 'position' => 'Sekretaris Umum',
                 'batch' => "'23",
                 'bio' => 'Tata kelola persuratan, inventaris arsip, & administrasi kesekretariatan',
-                'photo_path' => 'images/members/sekum.svg',
+                'photo_path' => 'images/members/sekum.png',
                 'sort_order' => 4,
             ],
             [
-                'name' => 'Siti Nurhaliza',
+                'name' => 'Tiara',
                 'nim' => 'F11123059',
                 'position' => 'Bendahara Umum',
                 'batch' => "'23",
                 'bio' => 'Manajemen perbendaharaan kas, transparansi anggaran, & laporan keuangan',
-                'photo_path' => 'images/members/bendum.svg',
+                'photo_path' => 'images/members/bendum.png',
                 'sort_order' => 5,
             ],
         ];
@@ -127,10 +130,10 @@ class DatabaseSeeder extends Seeder
                 'code' => 'DIVISI 01',
                 'description' => 'Inovasi rekayasa konstruksi, material beton, dan teknologi rekayasa sipil.',
                 'sort_order' => 1,
-                'coordinator' => 'Bagus Wicaksono',
+                'coordinator' => 'Yani',
                 'coord_nim' => 'F11123002',
                 'coord_batch' => "'23",
-                'coord_photo' => 'images/members/ristek.svg',
+                'coord_photo' => 'images/members/ristek.png',
             ],
             [
                 'name' => 'Infokom',
@@ -138,10 +141,10 @@ class DatabaseSeeder extends Seeder
                 'code' => 'DIVISI 02',
                 'description' => 'Pengelolaan media resmi, publikasi digital, dan dokumentasi visual.',
                 'sort_order' => 2,
-                'coordinator' => 'Reza Pratama',
+                'coordinator' => 'Syauqi',
                 'coord_nim' => 'F11123041',
                 'coord_batch' => "'23",
-                'coord_photo' => 'images/members/infokom.svg',
+                'coord_photo' => 'images/members/infokom.png',
             ],
             [
                 'name' => 'Penalaran',
@@ -149,10 +152,10 @@ class DatabaseSeeder extends Seeder
                 'code' => 'DIVISI 03',
                 'description' => 'Pendampingan lomba jembatan (KJI/KBGI), bimbingan akademik, & tutor sebaya.',
                 'sort_order' => 3,
-                'coordinator' => 'Annisa Salsabila',
+                'coordinator' => 'Dava',
                 'coord_nim' => 'F11123089',
                 'coord_batch' => "'23",
-                'coord_photo' => 'images/members/penalaran.svg',
+                'coord_photo' => 'images/members/penalaran.png',
             ],
             [
                 'name' => 'FKMTSI',
@@ -160,10 +163,10 @@ class DatabaseSeeder extends Seeder
                 'code' => 'DIVISI 04',
                 'description' => 'Hubungan koordinasi FKMTSI Wilayah VIII dan temu wicara nasional.',
                 'sort_order' => 4,
-                'coordinator' => 'Irfan Ramadhan',
+                'coordinator' => 'Dhani',
                 'coord_nim' => 'F11123110',
                 'coord_batch' => "'23",
-                'coord_photo' => 'images/members/fkmtsi.svg',
+                'coord_photo' => 'images/members/fkmtsi.png',
             ],
             [
                 'name' => 'Hublua',
@@ -171,10 +174,10 @@ class DatabaseSeeder extends Seeder
                 'code' => 'DIVISI 05',
                 'description' => 'Sinergi dengan instansi PUPR, BUMN Karya, LPJK, dan jejaring alumni.',
                 'sort_order' => 5,
-                'coordinator' => 'Kevin Alfarizi',
+                'coordinator' => 'Juven',
                 'coord_nim' => 'F11123023',
                 'coord_batch' => "'23",
-                'coord_photo' => 'images/members/hublua.svg',
+                'coord_photo' => 'images/members/hublua.png',
             ],
             [
                 'name' => 'Bursa',
@@ -182,10 +185,10 @@ class DatabaseSeeder extends Seeder
                 'code' => 'DIVISI 06',
                 'description' => 'Pengadaan merchandise resmi, atribut keteknikan, dan kemandirian dana.',
                 'sort_order' => 6,
-                'coordinator' => 'Nadia Rahmawati',
+                'coordinator' => 'Dinay',
                 'coord_nim' => 'F11123067',
                 'coord_batch' => "'23",
-                'coord_photo' => 'images/members/bursa.svg',
+                'coord_photo' => 'images/members/bursa.png',
             ],
             [
                 'name' => 'Advokasi',
@@ -193,10 +196,10 @@ class DatabaseSeeder extends Seeder
                 'code' => 'DIVISI 07',
                 'description' => 'Penjaringan aspirasi civitas, advokasi sarana lab, dan perlindungan hak mahasiswa.',
                 'sort_order' => 7,
-                'coordinator' => 'Muhammad Tegar',
+                'coordinator' => 'Nathan',
                 'coord_nim' => 'F11123078',
                 'coord_batch' => "'23",
-                'coord_photo' => 'images/members/advokasi.svg',
+                'coord_photo' => 'images/members/advokasi.png',
             ],
             [
                 'name' => 'Kaderisasi',
@@ -204,10 +207,10 @@ class DatabaseSeeder extends Seeder
                 'code' => 'DIVISI 08',
                 'description' => 'Pembinaan karakter moral calon insinyur, pelatihan kepemimpinan, & jiwa korsa.',
                 'sort_order' => 8,
-                'coordinator' => 'Fahri Hidayat',
+                'coordinator' => 'Farhan',
                 'coord_nim' => 'F11123095',
                 'coord_batch' => "'23",
-                'coord_photo' => 'images/members/kaderisasi.svg',
+                'coord_photo' => 'images/members/kaderisasi.png',
             ],
         ];
 
@@ -257,6 +260,52 @@ class DatabaseSeeder extends Seeder
                 'condition' => 'baik',
                 'is_active' => true,
             ]));
+        }
+
+        // 5. Akun Kas Utama
+        CashAccount::firstOrCreate(
+            ['period_id' => $period->id, 'code' => 'KAS-BPH-01'],
+            [
+                'name' => 'Kas Operasional BPH HMTS',
+                'current_balance' => 0,
+                'is_active' => true,
+            ]
+        );
+
+        // 6. Program Kerja Termasuk Kategori Internal
+        foreach ([
+            [
+                'title' => 'Rapat Kerja & Upgrading Pengurus',
+                'category' => 'internal',
+                'description' => 'Konsolidasi internal kepengurusan, penetapan roadmap program kerja tahunan, dan peningkatan kapasitas manajerial pengurus HMTS FT-UNTAD.',
+                'starts_at' => now()->addDays(7)->setTime(9, 0),
+                'ends_at' => now()->addDays(7)->setTime(16, 0),
+                'location' => 'Ruang Sidang Jurusan Teknik Sipil',
+                'status' => 'rencana',
+            ],
+            [
+                'title' => 'Pelatihan Software Rekayasa Struktur SAP2000',
+                'category' => 'workshop',
+                'description' => 'Pelatihan intensif pemodelan analisis struktur bangunan gedung bertingkat tahan gempa untuk mahasiswa teknik sipil.',
+                'starts_at' => now()->addDays(14)->setTime(8, 30),
+                'ends_at' => now()->addDays(15)->setTime(15, 30),
+                'location' => 'Laboratorium Komputasi Teknik Sipil',
+                'status' => 'rencana',
+            ],
+            [
+                'title' => 'Civil Bridge Competition & Mentoring KJI/KBGI',
+                'category' => 'competition',
+                'description' => 'Bimbingan teknis perancangan jembatan dan simulasi pembebanan jembatan balsa menuju Kompetisi Jembatan Indonesia.',
+                'starts_at' => now()->addDays(21)->setTime(10, 0),
+                'ends_at' => now()->addDays(21)->setTime(17, 0),
+                'location' => 'Laboratorium Bahan & Konstruksi',
+                'status' => 'rencana',
+            ],
+        ] as $prog) {
+            Program::firstOrCreate(
+                ['period_id' => $period->id, 'title' => $prog['title']],
+                $prog
+            );
         }
     }
 }

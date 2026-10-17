@@ -32,7 +32,14 @@ class ProgramIndex extends Component
     public function render()
     {
         return view('livewire.public.program-index', [
-            'categories' => ['all' => 'Semua Kategori', 'competition' => 'Kompetisi & Lomba', 'workshop' => 'Workshop & Pelatihan', 'community' => 'Pengabdian Masyarakat', 'seminar' => 'Seminar Akademik'],
+            'categories' => [
+                'all' => 'Semua Kategori',
+                'internal' => 'Internal Organisasi',
+                'competition' => 'Kompetisi & Lomba',
+                'workshop' => 'Workshop & Pelatihan',
+                'community' => 'Pengabdian Masyarakat',
+                'seminar' => 'Seminar Akademik',
+            ],
             'filteredPrograms' => Program::query()->when($this->selectedCategory !== 'all', fn ($query) => $query->where('category', $this->selectedCategory))->orderBy('starts_at')->get(),
             'activeProgram' => $this->activeProgramId ? Program::find($this->activeProgramId) : null,
         ]);

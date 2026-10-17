@@ -122,12 +122,12 @@
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-zinc-300 font-semibold mb-1 uppercase">Tanggal Pinjam</label>
-                                        <input type="date" wire:model="borrowStartDate" required class="w-full bg-[#181822] border border-white/10 focus:border-brand-orange rounded-xl px-4 py-2.5 text-white outline-none">
+                                        <input type="date" wire:model="borrowStartDate" required onclick="this.showPicker()" class="w-full bg-[#181822] border border-white/10 focus:border-brand-orange rounded-xl px-4 py-2.5 text-white outline-none [color-scheme:dark] cursor-pointer">
                                         @error('borrowStartDate') <span class="text-red-400 text-[10px]">{{ $message }}</span> @enderror
                                     </div>
                                     <div>
                                         <label class="block text-zinc-300 font-semibold mb-1 uppercase">Tanggal Pengembalian</label>
-                                        <input type="date" wire:model="borrowEndDate" required class="w-full bg-[#181822] border border-white/10 focus:border-brand-orange rounded-xl px-4 py-2.5 text-white outline-none">
+                                        <input type="date" wire:model="borrowEndDate" required onclick="this.showPicker()" class="w-full bg-[#181822] border border-white/10 focus:border-brand-orange rounded-xl px-4 py-2.5 text-white outline-none [color-scheme:dark] cursor-pointer">
                                         @error('borrowEndDate') <span class="text-red-400 text-[10px]">{{ $message }}</span> @enderror
                                     </div>
                                 </div>

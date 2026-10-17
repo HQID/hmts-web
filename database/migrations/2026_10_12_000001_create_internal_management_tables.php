@@ -92,10 +92,7 @@ return new class extends Migration
             $table->foreignId('program_id')->nullable()->constrained()->nullOnDelete();
             $table->string('title');
             $table->dateTime('held_at');
-            $table->string('location')->nullable();
-            $table->longText('participants')->nullable();
-            $table->longText('content');
-            $table->longText('follow_up')->nullable();
+            $table->string('file_path')->nullable();
             $table->foreignId('created_by_user_id')->constrained('users')->restrictOnDelete();
             $table->timestamps();
         });

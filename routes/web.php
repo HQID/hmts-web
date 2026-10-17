@@ -86,10 +86,15 @@ Route::middleware(['auth', 'can:manage-command-center'])->prefix('app')->as('app
     Route::post('/kas/{transaction}/void', [CashController::class, 'void'])->name('cash.void');
     Route::get('/inventaris', [ManagementController::class, 'index'])->defaults('module', 'inventory')->name('inventory.index');
     Route::post('/inventaris', [ManagementController::class, 'store'])->defaults('module', 'inventory')->name('inventory.store');
+    Route::get('/inventaris/{inventory}/edit', [ManagementController::class, 'editInventory'])->name('inventory.edit');
+    Route::put('/inventaris/{inventory}', [ManagementController::class, 'updateInventory'])->name('inventory.update');
     Route::get('/surat', [OperationsController::class, 'index'])->defaults('module', 'letters')->name('letters.index');
     Route::post('/surat', [OperationsController::class, 'store'])->defaults('module', 'letters')->name('letters.store');
     Route::get('/notulensi', [ManagementController::class, 'index'])->defaults('module', 'meeting-notes')->name('meeting-notes.index');
     Route::post('/notulensi', [ManagementController::class, 'store'])->defaults('module', 'meeting-notes')->name('meeting-notes.store');
+    Route::get('/notulensi/{note}/edit', [ManagementController::class, 'editMeetingNote'])->name('meeting-notes.edit');
+    Route::put('/notulensi/{note}', [ManagementController::class, 'updateMeetingNote'])->name('meeting-notes.update');
+    Route::get('/notulensi/{note}/unduh', [ManagementController::class, 'downloadMeetingNote'])->name('meeting-notes.download');
     Route::get('/aset', [OperationsController::class, 'index'])->defaults('module', 'assets')->name('assets.index');
     Route::post('/aset', [OperationsController::class, 'store'])->defaults('module', 'assets')->name('assets.store');
     Route::get('/operasional/{module}', [OperationsController::class, 'index'])->whereIn('module', ['borrowings', 'aspirations', 'attendance', 'letters', 'assets', 'committees', 'periods', 'admins', 'receipts'])->name('operations.index');

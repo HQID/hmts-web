@@ -18,6 +18,11 @@ class PublicPagesTest extends TestCase
         $response->assertSee('Himpunan Mahasiswa');
         $response->assertSee('Teknik Sipil');
         $response->assertSee('#WeAreTheChampions');
+        $response->assertSee('https://www.instagram.com/hmts.tadulako/');
+        $response->assertSee('https://youtube.com/@hmtstadulako?si=PJiOm9hgBSJuHWC3', false);
+        $response->assertSee('https://www.tiktok.com/@hmts.tadulako', false);
+        $response->assertSee('https://x.com/hmtstadulako?s=21', false);
+        $response->assertDontSee('Program Kerja Pilihan');
     }
 
     public function test_about_page_returns_successful_response(): void
@@ -36,7 +41,7 @@ class PublicPagesTest extends TestCase
         $response->assertSee('DIVISI BURSA');
         $response->assertSee('DIVISI ADVOKASI');
         $response->assertSee('DIVISI KADERISASI');
-        $response->assertSee('Bagus Wicaksono');
+        $response->assertSee('Yani');
         $response->assertSee('images/members');
         $response->assertDontSee('01. KETUA');
         $response->assertDontSee('8 DIVISI PELAKSANA');
@@ -70,19 +75,19 @@ class PublicPagesTest extends TestCase
         $response = $this->get('/tentang');
 
         $response->assertStatus(200);
-        $response->assertSee('M. Rayhan Pratama');
-        $response->assertSee('Dimas Arya Nugraha');
-        $response->assertSee('Fadel Muhammad');
-        $response->assertSee('Amanda Putri Lestari');
-        $response->assertSee('Siti Nurhaliza');
-        $response->assertSee('Bagus Wicaksono');
-        $response->assertSee('Reza Pratama');
-        $response->assertSee('Annisa Salsabila');
-        $response->assertSee('Irfan Ramadhan');
-        $response->assertSee('Kevin Alfarizi');
-        $response->assertSee('Nadia Rahmawati');
-        $response->assertSee('Muhammad Tegar');
-        $response->assertSee('Fahri Hidayat');
+        $response->assertSee('Muhammad Farhan Mubarak');
+        $response->assertSee('Kifli');
+        $response->assertSee('Erzy');
+        $response->assertSee('Indah');
+        $response->assertSee('Tiara');
+        $response->assertSee('Yani');
+        $response->assertSee('Syauqi');
+        $response->assertSee('Dava');
+        $response->assertSee('Dhani');
+        $response->assertSee('Juven');
+        $response->assertSee('Dinay');
+        $response->assertSee('Nathan');
+        $response->assertSee('Farhan');
     }
 
     public function test_programs_page_returns_successful_response(): void

@@ -85,31 +85,36 @@
         </div>
     </section>
 
-    <!-- BAGIAN 2: GRID TRANSAKSI (FORM & TABEL) -->
-    <div class="grid gap-6 xl:grid-cols-[.85fr_1.15fr] items-start min-w-0">
+    <!-- BAGIAN 2: TRANSAKSI (CATAT DI ATAS, RIWAYAT DI BAWAH) -->
+    <div class="space-y-8 min-w-0">
 
-        <!-- Form Catat Transaksi Kas -->
+        <!-- Form Catat Transaksi Kas (Di Atas) -->
         <section class="clean-card p-6 sm:p-7 rounded-3xl min-w-0 overflow-hidden">
-            <div class="mb-5 pb-3 border-b border-white/10">
-                <span class="text-brand-yellow font-mono text-xs font-semibold uppercase block mb-1">Entri Ledger</span>
-                <h2 class="font-display font-bold text-lg text-white">Catat Transaksi Kas</h2>
+            <div class="mb-5 pb-3 border-b border-white/10 flex items-center justify-between">
+                <div>
+                    <span class="text-brand-yellow font-mono text-xs font-semibold uppercase block mb-1">Entri Ledger</span>
+                    <h2 class="font-display font-bold text-xl text-white">Catat Transaksi Kas</h2>
+                </div>
+                <span class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-zinc-300 hidden sm:inline-block">
+                    Pencatatan Transaksi Masuk & Keluar
+                </span>
             </div>
 
-            <form method="POST" action="{{ route('app.cash.store') }}" class="mt-5 grid gap-4 min-w-0 w-full">
+            <form method="POST" action="{{ route('app.cash.store') }}" class="mt-5 grid gap-5 min-w-0 w-full">
                 @csrf
-                <label class="flex flex-col gap-2 text-sm text-zinc-300 min-w-0 w-full">
-                    <span>Pilih Akun Kas</span>
-                    <select required name="cash_account_id" class="w-full min-w-0 rounded-xl border border-white/10 bg-[#181822] p-3 text-white focus:border-brand-yellow focus:outline-none transition-colors">
-                        <option value="">Pilih akun kas sumber / tujuan</option>
-                        @foreach($accounts as $account)
-                            <option value="{{ $account->id }}" @selected(old('cash_account_id', $selectedAccountId) == $account->id)>
-                                {{ $account->name }} ({{ $account->code }}) — Rp {{ number_format($account->current_balance, 2, ',', '.') }}
-                            </option>
-                        @endforeach
-                    </select>
-                </label>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 min-w-0 w-full">
+                    <label class="flex flex-col gap-2 text-sm text-zinc-300 min-w-0 w-full">
+                        <span>Pilih Akun Kas</span>
+                        <select required name="cash_account_id" class="w-full min-w-0 rounded-xl border border-white/10 bg-[#181822] p-3 text-white focus:border-brand-yellow focus:outline-none transition-colors">
+                            <option value="">Pilih akun kas sumber / tujuan</option>
+                            @foreach($accounts as $account)
+                                <option value="{{ $account->id }}" @selected(old('cash_account_id', $selectedAccountId) == $account->id)>
+                                    {{ $account->name }} ({{ $account->code }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </label>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 min-w-0 w-full">
                     <label class="flex flex-col gap-2 text-sm text-zinc-300 min-w-0 w-full">
                         <span>Jenis Transaksi</span>
                         <select name="type" class="w-full min-w-0 rounded-xl border border-white/10 bg-[#181822] p-3 text-white focus:border-brand-yellow focus:outline-none transition-colors">
@@ -128,30 +133,32 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 min-w-0 w-full">
                     <label class="flex flex-col gap-2 text-sm text-zinc-300 min-w-0 w-full">
                         <span>Pilih Tanggal</span>
-                        <input required type="date" name="transacted_date" value="{{ old('transacted_date', now()->format('Y-m-d')) }}" class="w-full min-w-0 rounded-xl border border-white/10 bg-[#181822] p-3 text-white [color-scheme:dark] cursor-pointer focus:border-brand-yellow focus:outline-none transition-colors">
+                        <input required type="date" name="transacted_date" value="{{ old('transacted_date', now()->format('Y-m-d')) }}" onclick="this.showPicker()" class="w-full min-w-0 rounded-xl border border-white/10 bg-[#181822] p-3 text-white [color-scheme:dark] cursor-pointer focus:border-brand-yellow focus:outline-none transition-colors">
                     </label>
                     <label class="flex flex-col gap-2 text-sm text-zinc-300 min-w-0 w-full">
                         <span>Pilih Waktu (WITA)</span>
-                        <input required type="time" name="transacted_time" value="{{ old('transacted_time', now()->format('H:i')) }}" class="w-full min-w-0 rounded-xl border border-white/10 bg-[#181822] p-3 text-white [color-scheme:dark] cursor-pointer focus:border-brand-yellow focus:outline-none transition-colors">
+                        <input required type="time" name="transacted_time" value="{{ old('transacted_time', now()->format('H:i')) }}" onclick="this.showPicker()" class="w-full min-w-0 rounded-xl border border-white/10 bg-[#181822] p-3 text-white [color-scheme:dark] cursor-pointer focus:border-brand-yellow focus:outline-none transition-colors">
                     </label>
                 </div>
 
                 <label class="flex flex-col gap-2 text-sm text-zinc-300 min-w-0 w-full">
                     <span>Keterangan Transaksi</span>
-                    <textarea required name="description" maxlength="2000" rows="3" placeholder="Uraian peruntukan transaksi..." class="w-full min-w-0 rounded-xl border border-white/10 bg-[#181822] p-3 text-white focus:border-brand-yellow focus:outline-none transition-colors">{{ old('description') }}</textarea>
+                    <textarea required name="description" maxlength="2000" rows="2" placeholder="Uraian peruntukan transaksi..." class="w-full min-w-0 rounded-xl border border-white/10 bg-[#181822] p-3 text-white focus:border-brand-yellow focus:outline-none transition-colors">{{ old('description') }}</textarea>
                 </label>
 
-                <button class="mt-2 rounded-full bg-brand-orange px-5 py-3 font-semibold text-white hover:bg-brand-orangeHover shadow-lg transition-colors">
-                    Simpan Transaksi Kas
-                </button>
+                <div class="flex items-center justify-start pt-1">
+                    <button class="rounded-full bg-brand-orange px-6 py-3 font-semibold text-white hover:bg-brand-orangeHover shadow-lg transition-colors cursor-pointer">
+                        Simpan Transaksi Kas
+                    </button>
+                </div>
             </form>
         </section>
 
-        <!-- Tabel Informasi Kas & Kuitansi -->
+        <!-- Tabel Informasi Kas & Kuitansi (Di Bawah) -->
         <section class="clean-card overflow-hidden rounded-3xl min-w-0">
             <div class="border-b border-white/10 p-5 sm:p-6 flex flex-wrap items-center justify-between gap-4 bg-white/[0.02]">
                 <div>
-                    <h2 class="font-display text-lg font-bold text-white">Riwayat Transaksi Kas</h2>
+                    <h2 class="font-display font-bold text-xl text-white">Riwayat Transaksi Kas</h2>
                     <p class="text-xs text-zinc-400 mt-0.5">Ledger permanen transaksi dan arsip kuitansi</p>
                 </div>
 

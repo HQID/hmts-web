@@ -10,12 +10,23 @@
             </div>
         </div>
 
-        <!-- Tautan Navigasi -->
-        <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
-            <a href="{{ route('home') }}" class="hover:text-brand-yellow transition-colors">Beranda</a>
-            <a href="{{ route('about') }}" class="hover:text-brand-yellow transition-colors">Tentang Kami</a>
-            <a href="{{ route('programs.index') }}" class="hover:text-brand-yellow transition-colors">Kegiatan</a>
-            <a href="{{ route('services.hub') }}" class="hover:text-brand-yellow transition-colors">Layanan Mahasiswa</a>
+        <!-- Tautan Navigasi & Sosial Media -->
+        <div class="flex flex-col items-center gap-3">
+            <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
+                <a href="{{ route('home') }}" class="hover:text-brand-yellow transition-colors">Beranda</a>
+                <a href="{{ route('about') }}" class="hover:text-brand-yellow transition-colors">Tentang Kami</a>
+                <a href="{{ route('programs.index') }}" class="hover:text-brand-yellow transition-colors">Kegiatan</a>
+                <a href="{{ route('services.hub') }}" class="hover:text-brand-yellow transition-colors">Layanan Mahasiswa</a>
+            </div>
+            <div class="flex items-center gap-4 text-[11px] text-zinc-400">
+                <a href="https://www.instagram.com/hmts.tadulako/" target="_blank" rel="noopener noreferrer" class="hover:text-brand-yellow transition-colors">Instagram</a>
+                <span>•</span>
+                <a href="https://youtube.com/@hmtstadulako?si=PJiOm9hgBSJuHWC3" target="_blank" rel="noopener noreferrer" class="hover:text-brand-yellow transition-colors">YouTube</a>
+                <span>•</span>
+                <a href="https://www.tiktok.com/@hmts.tadulako?_t=ZS-8zkVbiC04jl&_r=1" target="_blank" rel="noopener noreferrer" class="hover:text-brand-yellow transition-colors">TikTok</a>
+                <span>•</span>
+                <a href="https://x.com/hmtstadulako?s=21" target="_blank" rel="noopener noreferrer" class="hover:text-brand-yellow transition-colors">X</a>
+            </div>
         </div>
 
         <!-- Hak Cipta -->

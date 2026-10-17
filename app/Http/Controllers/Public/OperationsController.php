@@ -54,6 +54,15 @@ class OperationsController extends Controller
 
     public function store(Request $request, string $module): RedirectResponse
     {
+        foreach (['starts_at', 'ends_at'] as $dtField) {
+            if ($request->filled($dtField . '_date')) {
+                $time = $request->input($dtField . '_time') ?: '08:00';
+                $request->merge([
+                    $dtField => $request->input($dtField . '_date') . ' ' . $time,
+                ]);
+            }
+        }
+
         $definition = $this->definition($module);
         if (in_array($module, ['periods', 'admins'], true)) {
             Gate::authorize('manage-periods-and-admins');
