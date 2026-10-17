@@ -37,7 +37,6 @@ return new class extends Migration
             $table->foreignId('division_id')->nullable()->constrained('divisions')->nullOnDelete();
             $table->string('name');
             $table->string('nim', 30)->nullable();
-            $table->string('role_type', 30)->default('staff'); // 'ketua', 'bph', 'coordinator', 'staff'
             $table->string('position'); // e.g. "Ketua", "Ketua 1", "Ketua 2", "Sekretaris Umum", "Bendahara Umum"
             $table->string('batch', 10)->nullable(); // e.g. "'22", "'23"
             $table->string('bio')->nullable();

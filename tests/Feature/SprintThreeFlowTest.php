@@ -229,8 +229,8 @@ class SprintThreeFlowTest extends TestCase
     public function test_committee_links_and_task_status_cannot_cross_periods(): void
     {
         $program = Program::create(['period_id' => $this->period->id, 'title' => 'Seminar Teknik', 'category' => 'seminar']);
-        $member = Member::create(['period_id' => $this->period->id, 'name' => 'Anggota Aktif', 'role_type' => 'staff', 'position' => 'Staf']);
-        $otherMember = Member::create(['period_id' => $this->otherPeriod()->id, 'name' => 'Anggota Arsip', 'role_type' => 'staff', 'position' => 'Staf']);
+        $member = Member::create(['period_id' => $this->period->id, 'name' => 'Anggota Aktif', 'position' => 'Staf']);
+        $otherMember = Member::create(['period_id' => $this->otherPeriod()->id, 'name' => 'Anggota Arsip', 'position' => 'Staf']);
         $data = ['program_id' => $program->id, 'member_id' => $member->id, 'name' => 'Panitia Seminar', 'position' => 'Acara', 'task_status' => 'belum_mulai'];
         $this->actingAs($this->admin)->post('/app/operasional/committees', array_replace($data, ['member_id' => $otherMember->id]))->assertNotFound();
         $this->post('/app/operasional/committees', $data)->assertSessionHasNoErrors()->assertRedirect();
@@ -243,8 +243,8 @@ class SprintThreeFlowTest extends TestCase
 
     public function test_csv_exports_are_authorized_scoped_and_escape_spreadsheet_formulas(): void
     {
-        Member::create(['period_id' => $this->period->id, 'name' => '=SUM(1,2)', 'nim' => 'F11126001', 'role_type' => 'staff', 'position' => "Staf, \"Acara\"\nBaris dua", 'batch' => '26']);
-        Member::create(['period_id' => $this->otherPeriod()->id, 'name' => 'Anggota Tersembunyi', 'role_type' => 'staff', 'position' => 'Arsip']);
+        Member::create(['period_id' => $this->period->id, 'name' => '=SUM(1,2)', 'nim' => 'F11126001', 'position' => "Staf, \"Acara\"\nBaris dua", 'batch' => '26']);
+        Member::create(['period_id' => $this->otherPeriod()->id, 'name' => 'Anggota Tersembunyi', 'position' => 'Arsip']);
         $this->transaction(' +SUM(1,2)');
         $this->get('/app/ekspor/anggota.csv')->assertRedirect('/login');
         $this->get('/app/ekspor/kas.csv')->assertRedirect('/login');

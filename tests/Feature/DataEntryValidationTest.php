@@ -14,6 +14,7 @@ use App\Models\DesignAsset;
 use App\Models\Division;
 use App\Models\Inventory;
 use App\Models\Letter;
+use App\Models\Member;
 use App\Models\Period;
 use App\Models\Program;
 use App\Models\User;
@@ -48,25 +49,33 @@ class DataEntryValidationTest extends TestCase
     public function test_member_blank_sort_order_uses_zero_and_preserves_nullable_fields(): void
     {
         $division = Division::create(['period_id' => $this->period->id, 'name' => 'Infokom']);
+        $member = Member::create(['period_id' => $this->period->id, 'name' => 'Hasby Ashidiq', 'position' => 'Anggota']);
+
         foreach ([[], ['sort_order' => ''], ['sort_order' => '   '], ['sort_order' => null], ['sort_order' => '0'], ['sort_order' => '12']] as $index => $overrides) {
             $data = array_replace($this->memberData(), ['nim' => 'F5512301'.$index, 'division_id' => $division->id], $overrides);
-            $this->post('/app/anggota', $data)->assertSessionHasNoErrors()->assertRedirect();
-            $this->assertDatabaseHas('members', ['nim' => $data['nim'], 'division_id' => $division->id, 'sort_order' => $index === 5 ? 12 : 0, 'bio' => null]);
+            $this->put('/app/anggota/'.$member->id, $data)->assertSessionHasNoErrors()->assertRedirect();
+            $this->assertDatabaseHas('members', ['id' => $member->id, 'nim' => $data['nim'], 'division_id' => $division->id, 'sort_order' => $index === 5 ? 12 : 0, 'bio' => null]);
         }
-        $this->post('/app/anggota', $this->memberData())->assertSessionHasNoErrors();
-        $this->assertDatabaseHas('members', ['name' => 'Hasby Ashidiq', 'division_id' => null]);
-        $this->post('/app/anggota', array_replace($this->memberData(), [
+        $this->put('/app/anggota/'.$member->id, $this->memberData())->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('members', ['id' => $member->id, 'name' => 'Hasby Ashidiq', 'division_id' => null]);
+        $this->put('/app/anggota/'.$member->id, array_replace($this->memberData(), [
             'division_id' => $division->id, 'bio' => 'Saya adalah orang ganteng', 'sort_order' => '',
         ]))->assertSessionHasNoErrors()->assertRedirect();
-        $this->assertDatabaseHas('members', ['nim' => 'F55123010', 'division_id' => $division->id, 'bio' => 'Saya adalah orang ganteng', 'sort_order' => 0]);
+        $this->assertDatabaseHas('members', ['id' => $member->id, 'nim' => 'F55123010', 'division_id' => $division->id, 'bio' => 'Saya adalah orang ganteng', 'sort_order' => 0]);
     }
 
     public function test_member_invalid_sort_order_is_a_field_error_not_an_insert(): void
     {
+        $member = Member::create(['period_id' => $this->period->id, 'name' => 'Hasby Ashidiq', 'position' => 'Anggota', 'sort_order' => 0]);
         foreach (['-1', '65536', '1.5', 'abc', ['1']] as $value) {
-            $this->post('/app/anggota', array_replace($this->memberData(), ['sort_order' => $value]))->assertSessionHasErrors('sort_order');
+            $this->put('/app/anggota/'.$member->id, array_replace($this->memberData(), ['sort_order' => $value]))->assertSessionHasErrors('sort_order');
         }
-        $this->assertDatabaseCount('members', 0);
+        $this->assertEquals(0, $member->fresh()->sort_order);
+    }
+
+    public function test_adding_new_member_via_store_is_disabled(): void
+    {
+        $this->post('/app/anggota', $this->memberData())->assertRedirect('/app/anggota')->assertSessionHas('status');
     }
 
     public function test_management_relations_must_belong_to_the_target_period(): void
@@ -74,9 +83,10 @@ class DataEntryValidationTest extends TestCase
         $old = Period::create(['name' => 'Arsip', 'start_year' => 2025, 'end_year' => 2026, 'is_active' => false]);
         $division = Division::create(['period_id' => $old->id, 'name' => 'Divisi Arsip']);
         $program = Program::create(['period_id' => $old->id, 'title' => 'Proker Arsip', 'category' => 'seminar']);
-        $this->post('/app/anggota', array_replace($this->memberData(), ['division_id' => $division->id]))->assertSessionHasErrors('division_id');
+        $member = Member::create(['period_id' => $this->period->id, 'name' => 'Hasby Ashidiq', 'position' => 'Anggota']);
+
+        $this->put('/app/anggota/'.$member->id, array_replace($this->memberData(), ['division_id' => $division->id]))->assertSessionHasErrors('division_id');
         $this->post('/app/notulensi', ['title' => 'Rapat', 'held_at' => now()->toDateTimeString(), 'content' => 'Pembahasan rapat', 'program_id' => $program->id])->assertSessionHasErrors('program_id');
-        $this->assertDatabaseCount('members', 0);
         $this->assertDatabaseCount('meeting_notes', 0);
     }
 
@@ -270,8 +280,9 @@ class DataEntryValidationTest extends TestCase
         Letter::create(['period_id' => $old->id, 'agenda_number' => 'GLOBAL', 'type' => 'masuk', 'subject' => 'Arsip', 'received_or_sent_on' => '2025-10-17', 'registered_by_user_id' => $this->admin->id]);
         $this->post('/app/inventaris', ['name' => 'Alat', 'code' => 'GLOBAL', 'total_qty' => 1, 'available_qty' => 1, 'condition' => 'baik'])->assertSessionHasErrors('code');
         $this->post('/app/surat', ['agenda_number' => 'GLOBAL', 'type' => 'masuk', 'subject' => 'Surat', 'received_or_sent_on' => '2026-10-17', 'status' => 'terdaftar'])->assertSessionHasErrors('agenda_number');
-        $this->post('/app/anggota', $this->memberData() + ['sort_order' => 65535])->assertSessionHasNoErrors();
-        $this->assertDatabaseHas('members', ['sort_order' => 65535]);
+        $member = Member::create(['period_id' => $this->period->id, 'name' => 'Hasby Ashidiq', 'position' => 'Anggota']);
+        $this->put('/app/anggota/'.$member->id, $this->memberData() + ['sort_order' => 65535])->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('members', ['id' => $member->id, 'sort_order' => 65535]);
         $this->post('/app/inventaris', ['name' => 'Batas', 'code' => 'MAX', 'total_qty' => 4294967295, 'available_qty' => 4294967295, 'condition' => 'baik'])->assertSessionHasNoErrors();
         $this->assertDatabaseHas('inventories', ['code' => 'MAX', 'total_qty' => 4294967295]);
         $this->post('/app/operasional/periods', ['name' => 'Batas Tahun', 'start_year' => 65535, 'end_year' => 65535, 'is_active' => '0'])->assertSessionHasNoErrors();
@@ -310,6 +321,6 @@ class DataEntryValidationTest extends TestCase
 
     private function memberData(): array
     {
-        return ['name' => 'Hasby Ashidiq', 'nim' => 'F55123010', 'division_id' => '', 'role_type' => 'staff', 'position' => 'Anggota', 'batch' => '24', 'bio' => ''];
+        return ['name' => 'Hasby Ashidiq', 'nim' => 'F55123010', 'division_id' => '', 'position' => 'Anggota', 'batch' => '24', 'bio' => ''];
     }
 }

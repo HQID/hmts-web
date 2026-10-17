@@ -32,4 +32,9 @@ class Division extends Model
     {
         return $this->hasMany(Member::class)->orderBy('sort_order');
     }
+
+    public function getCoordinatorAttribute(): ?Member
+    {
+        return $this->members->first();
+    }
 }

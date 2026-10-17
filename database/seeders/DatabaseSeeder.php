@@ -46,62 +46,76 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // 3. Badan Pengurus Harian (BPH: 1 Ketua & 4 Pimpinan Harian)
+        // 3. Divisi BPH (Badan Pengurus Harian)
+        $bphDivision = Division::updateOrCreate(
+            [
+                'period_id' => $period->id,
+                'name' => 'BPH',
+            ],
+            [
+                'period_id' => $period->id,
+                'full_name' => 'Badan Pengurus Harian',
+                'code' => 'BPH',
+                'description' => 'Badan Pengurus Harian HMTS FT-UNTAD: Pimpinan umum, koordinasi internal-eksternal, administrasi, dan kebendaharaan.',
+                'sort_order' => 0,
+            ]
+        );
+
         $bphData = [
             [
                 'name' => 'M. Rayhan Pratama',
                 'nim' => 'F11122045',
-                'role_type' => 'ketua',
                 'position' => 'Ketua',
                 'batch' => "'22",
                 'bio' => 'Penanggung jawab umum arah kebijakan & kepemimpinan organisasi',
+                'photo_path' => 'images/members/ketua.svg',
                 'sort_order' => 1,
             ],
             [
                 'name' => 'Dimas Arya Nugraha',
                 'nim' => 'F11122087',
-                'role_type' => 'bph',
                 'position' => 'Ketua 1',
                 'batch' => "'22",
                 'bio' => 'Koordinator bidang internal keorganisasian & sinkronisasi divisi',
+                'photo_path' => 'images/members/ketua1.svg',
                 'sort_order' => 2,
             ],
             [
                 'name' => 'Fadel Muhammad',
                 'nim' => 'F11122103',
-                'role_type' => 'bph',
                 'position' => 'Ketua 2',
                 'batch' => "'22",
                 'bio' => 'Koordinator bidang eksternal, kemitraan lembaga, & keprofesian',
+                'photo_path' => 'images/members/ketua2.svg',
                 'sort_order' => 3,
             ],
             [
                 'name' => 'Amanda Putri Lestari',
                 'nim' => 'F11123014',
-                'role_type' => 'bph',
                 'position' => 'Sekretaris Umum',
                 'batch' => "'23",
                 'bio' => 'Tata kelola persuratan, inventaris arsip, & administrasi kesekretariatan',
+                'photo_path' => 'images/members/sekum.svg',
                 'sort_order' => 4,
             ],
             [
                 'name' => 'Siti Nurhaliza',
                 'nim' => 'F11123059',
-                'role_type' => 'bph',
                 'position' => 'Bendahara Umum',
                 'batch' => "'23",
                 'bio' => 'Manajemen perbendaharaan kas, transparansi anggaran, & laporan keuangan',
+                'photo_path' => 'images/members/bendum.svg',
                 'sort_order' => 5,
             ],
         ];
 
         foreach ($bphData as $bph) {
-            Member::firstOrCreate(
+            Member::updateOrCreate(
                 [
                     'period_id' => $period->id,
                     'nim' => $bph['nim'],
                 ],
-                array_merge($bph, ['period_id' => $period->id, 'division_id' => null])
+                array_merge($bph, ['period_id' => $period->id, 'division_id' => $bphDivision->id])
             );
         }
 
@@ -109,88 +123,96 @@ class DatabaseSeeder extends Seeder
         $divisionsData = [
             [
                 'name' => 'Ristek',
-                'full_name' => 'Riset & Teknologi',
+                'full_name' => 'Divisi Ristek',
                 'code' => 'DIVISI 01',
                 'description' => 'Inovasi rekayasa konstruksi, material beton, dan teknologi rekayasa sipil.',
                 'sort_order' => 1,
                 'coordinator' => 'Bagus Wicaksono',
                 'coord_nim' => 'F11123002',
                 'coord_batch' => "'23",
+                'coord_photo' => 'images/members/ristek.svg',
             ],
             [
                 'name' => 'Infokom',
-                'full_name' => 'Informasi & Komunikasi',
+                'full_name' => 'Divisi Infokom',
                 'code' => 'DIVISI 02',
                 'description' => 'Pengelolaan media resmi, publikasi digital, dan dokumentasi visual.',
                 'sort_order' => 2,
                 'coordinator' => 'Reza Pratama',
                 'coord_nim' => 'F11123041',
                 'coord_batch' => "'23",
+                'coord_photo' => 'images/members/infokom.svg',
             ],
             [
                 'name' => 'Penalaran',
-                'full_name' => 'Penalaran Ilmiah & Prestasi',
+                'full_name' => 'Divisi Penalaran',
                 'code' => 'DIVISI 03',
                 'description' => 'Pendampingan lomba jembatan (KJI/KBGI), bimbingan akademik, & tutor sebaya.',
                 'sort_order' => 3,
                 'coordinator' => 'Annisa Salsabila',
                 'coord_nim' => 'F11123089',
                 'coord_batch' => "'23",
+                'coord_photo' => 'images/members/penalaran.svg',
             ],
             [
                 'name' => 'FKMTSI',
-                'full_name' => 'Forum Komunikasi Mahasiswa Teknik Sipil Indonesia',
+                'full_name' => 'Divisi FKMTSI',
                 'code' => 'DIVISI 04',
                 'description' => 'Hubungan koordinasi FKMTSI Wilayah VIII dan temu wicara nasional.',
                 'sort_order' => 4,
                 'coordinator' => 'Irfan Ramadhan',
                 'coord_nim' => 'F11123110',
                 'coord_batch' => "'23",
+                'coord_photo' => 'images/members/fkmtsi.svg',
             ],
             [
                 'name' => 'Hublua',
-                'full_name' => 'Hubungan Luar & Alumni',
+                'full_name' => 'Divisi Hublua',
                 'code' => 'DIVISI 05',
                 'description' => 'Sinergi dengan instansi PUPR, BUMN Karya, LPJK, dan jejaring alumni.',
                 'sort_order' => 5,
                 'coordinator' => 'Kevin Alfarizi',
                 'coord_nim' => 'F11123023',
                 'coord_batch' => "'23",
+                'coord_photo' => 'images/members/hublua.svg',
             ],
             [
                 'name' => 'Bursa',
-                'full_name' => 'Kewirausahaan Sipil',
+                'full_name' => 'Divisi Bursa',
                 'code' => 'DIVISI 06',
                 'description' => 'Pengadaan merchandise resmi, atribut keteknikan, dan kemandirian dana.',
                 'sort_order' => 6,
                 'coordinator' => 'Nadia Rahmawati',
                 'coord_nim' => 'F11123067',
                 'coord_batch' => "'23",
+                'coord_photo' => 'images/members/bursa.svg',
             ],
             [
                 'name' => 'Advokasi',
-                'full_name' => 'Advokasi & Kesejahteraan Mahasiswa',
+                'full_name' => 'Divisi Advokasi',
                 'code' => 'DIVISI 07',
                 'description' => 'Penjaringan aspirasi civitas, advokasi sarana lab, dan perlindungan hak mahasiswa.',
                 'sort_order' => 7,
                 'coordinator' => 'Muhammad Tegar',
                 'coord_nim' => 'F11123078',
                 'coord_batch' => "'23",
+                'coord_photo' => 'images/members/advokasi.svg',
             ],
             [
                 'name' => 'Kaderisasi',
-                'full_name' => 'Pengembangan Sumber Daya Mahasiswa',
+                'full_name' => 'Divisi Kaderisasi',
                 'code' => 'DIVISI 08',
                 'description' => 'Pembinaan karakter moral calon insinyur, pelatihan kepemimpinan, & jiwa korsa.',
                 'sort_order' => 8,
                 'coordinator' => 'Fahri Hidayat',
                 'coord_nim' => 'F11123095',
                 'coord_batch' => "'23",
+                'coord_photo' => 'images/members/kaderisasi.svg',
             ],
         ];
 
         foreach ($divisionsData as $divData) {
-            $division = Division::firstOrCreate(
+            $division = Division::updateOrCreate(
                 [
                     'period_id' => $period->id,
                     'name' => $divData['name'],
@@ -205,7 +227,7 @@ class DatabaseSeeder extends Seeder
             );
 
             // Koordinator Divisi
-            Member::firstOrCreate(
+            Member::updateOrCreate(
                 [
                     'period_id' => $period->id,
                     'nim' => $divData['coord_nim'],
@@ -215,9 +237,9 @@ class DatabaseSeeder extends Seeder
                     'division_id' => $division->id,
                     'name' => $divData['coordinator'],
                     'nim' => $divData['coord_nim'],
-                    'role_type' => 'coordinator',
                     'position' => 'Koordinator Divisi ' . $divData['name'],
                     'batch' => $divData['coord_batch'],
+                    'photo_path' => $divData['coord_photo'] ?? 'images/members/placeholder.svg',
                     'sort_order' => 1,
                 ]
             );

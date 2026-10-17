@@ -68,6 +68,9 @@ Route::middleware(['auth', 'can:manage-command-center'])->prefix('app')->as('app
     Route::get('/', DashboardController::class)->name('dashboard');
     Route::get('/anggota', [ManagementController::class, 'index'])->defaults('module', 'members')->name('members.index');
     Route::post('/anggota', [ManagementController::class, 'store'])->defaults('module', 'members')->name('members.store');
+    Route::get('/anggota/{member}/edit', [ManagementController::class, 'editMember'])->name('members.edit');
+    Route::put('/anggota/{member}', [ManagementController::class, 'updateMember'])->name('members.update');
+    Route::put('/periode/{period}', [ManagementController::class, 'updatePeriod'])->name('periods.update');
     Route::get('/program-kerja', [ManagementController::class, 'index'])->defaults('module', 'programs')->name('programs.index');
     Route::post('/program-kerja', [ManagementController::class, 'store'])->defaults('module', 'programs')->name('programs.store');
     Route::get('/program-kerja/{program}/edit', [ManagementController::class, 'editProgram'])->name('programs.edit');

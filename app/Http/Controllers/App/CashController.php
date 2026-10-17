@@ -17,11 +17,27 @@ use Illuminate\View\View;
 
 class CashController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
+        $accounts = CashAccount::where('is_active', true)->orderBy('name')->get();
+
+        $query = CashTransaction::with(['cashAccount', 'receipts', 'voidedBy']);
+
+        if ($request->filled('cash_account_id')) {
+            $query->where('cash_account_id', $request->cash_account_id);
+        }
+
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
+        }
+
+        $transactions = $query->latest('transacted_at')->paginate(20)->withQueryString();
+
         return view('app.cash.index', [
-            'accounts' => CashAccount::where('is_active', true)->orderBy('name')->get(),
-            'transactions' => CashTransaction::with(['cashAccount', 'receipts', 'voidedBy'])->latest('transacted_at')->paginate(20),
+            'accounts' => $accounts,
+            'transactions' => $transactions,
+            'selectedAccountId' => $request->cash_account_id,
+            'selectedType' => $request->type,
         ]);
     }
 
@@ -46,6 +62,11 @@ class CashController extends Controller
 
     public function store(Request $request, CreateCashTransactionAction $action): RedirectResponse
     {
+        if ($request->filled('transacted_date')) {
+            $time = $request->input('transacted_time', '00:00');
+            $request->merge(['transacted_at' => $request->transacted_date . ' ' . $time]);
+        }
+
         $data = $request->validate([
             'cash_account_id' => ['required', 'exists:cash_accounts,id'],
             'type' => ['required', 'in:masuk,keluar'],

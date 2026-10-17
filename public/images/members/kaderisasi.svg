@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400" width="300" height="400">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#181824"/>
+      <stop offset="100%" stop-color="#0E0E14"/>
+    </linearGradient>
+    <radialGradient id="glowGrad" cx="50%" cy="38%" r="65%">
+      <stop offset="0%" stop-color="#CC6600" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#CC6600" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFE500"/>
+      <stop offset="100%" stop-color="#CC6600"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background Base (Portrait 3:4) -->
+  <rect width="300" height="400" rx="28" fill="url(#bgGrad)"/>
+  <rect width="298" height="398" x="1" y="1" rx="27" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
+
+  <!-- Ambient Light Glow -->
+  <circle cx="150" cy="160" r="130" fill="url(#glowGrad)"/>
+
+  <!-- Architectural Truss Watermark -->
+  <g stroke="rgba(255,255,255,0.035)" stroke-width="2" fill="none">
+    <polygon points="150,40 40,240 260,240"/>
+    <line x1="150" y1="40" x2="150" y2="240"/>
+    <line x1="95" y1="140" x2="150" y2="240"/>
+    <line x1="205" y1="140" x2="150" y2="240"/>
+  </g>
+
+  <!-- Stylized Avatar Silhouette Base -->
+  <g fill="none" stroke="rgba(255,255,255,0.12)">
+    <!-- Outer Ring -->
+    <circle cx="150" cy="155" r="76" stroke="url(#accentGrad)" stroke-width="2.5" stroke-dasharray="460" stroke-dashoffset="35"/>
+    <circle cx="150" cy="155" r="66" fill="#14141E" stroke="rgba(255,255,255,0.06)"/>
+  </g>
+
+  <!-- Silhouette Icon & Monogram -->
+  <!-- Shoulders -->
+  <path d="M85,280 C85,225 110,215 150,215 C190,215 215,225 215,280" fill="#1A1A26" stroke="rgba(255,255,255,0.12)" stroke-width="2"/>
+  <!-- Head Silhouette Base -->
+  <circle cx="150" cy="148" r="36" fill="#1E1E2C" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
+
+  <!-- Initials Text Overlay -->
+  <text x="150" y="158" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="28" font-weight="800" fill="#FFE500" text-anchor="middle" letter-spacing="1">FH</text>
+
+  <!-- Role Pill Badge at Bottom -->
+  <g transform="translate(150, 345)">
+    <rect x="-80" y="-16" width="160" height="32" rx="16" fill="#0A0A0E" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+    <text x="0" y="4" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="11" font-weight="700" fill="rgba(255,255,255,0.85)" text-anchor="middle" text-transform="uppercase" letter-spacing="0.5">Koord. Kaderisasi</text>
+  </g>
+</svg>

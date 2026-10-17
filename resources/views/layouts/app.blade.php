@@ -17,7 +17,7 @@
                 <span class="font-display text-sm font-bold text-white">COMMAND CENTER</span>
             </a>
             <nav class="grid gap-1 text-sm">
-                @foreach (['dashboard' => ['Ringkasan', 'dashboard'], 'members' => ['Anggota & Divisi', 'members.index'], 'programs' => ['Program Kerja', 'programs.index'], 'attendance' => ['Presensi QR', 'attendance.index'], 'borrowings' => ['Inventaris & Peminjaman', 'borrowings.index'], 'cash' => ['Kas & Kuitansi', 'cash.index'], 'letters' => ['Surat & Disposisi', 'letters.index'], 'meeting' => ['Notulensi', 'meeting-notes.index'], 'aspiration' => ['Aspirasi', 'aspirations.index'], 'assets' => ['Bank Aset', 'assets.index']] as $key => [$label, $route])
+                @foreach (['dashboard' => ['Ringkasan', 'dashboard'], 'members' => ['Kepengurusan', 'members.index'], 'programs' => ['Program Kerja', 'programs.index'], 'attendance' => ['Presensi QR', 'attendance.index'], 'borrowings' => ['Inventaris & Peminjaman', 'borrowings.index'], 'cash' => ['Kas & Kuitansi', 'cash.index'], 'letters' => ['Surat & Disposisi', 'letters.index'], 'meeting' => ['Notulensi', 'meeting-notes.index'], 'aspiration' => ['Aspirasi', 'aspirations.index'], 'assets' => ['Bank Aset', 'assets.index']] as $key => [$label, $route])
                     <a href="{{ route('app.'.$route) }}" class="rounded-xl px-3 py-2.5 transition {{ request()->routeIs('app.'.$route) ? 'bg-brand-orange font-semibold text-white' : 'text-zinc-400 hover:bg-white/5 hover:text-white' }}">{{ $label }}</a>
                 @endforeach
             </nav>

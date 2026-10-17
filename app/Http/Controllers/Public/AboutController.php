@@ -27,9 +27,21 @@ class AboutController extends Controller
                 $periodName = $period->name;
             }
 
-            $ketua = Member::where('role_type', 'ketua')->first();
-            $bphList = Member::where('role_type', 'bph')->orderBy('sort_order')->get();
-            $divisions = Division::with('members')->orderBy('sort_order')->get();
+            // Ambil Divisi BPH (Ketua & 4 Pimpinan Harian)
+            $bphDivision = Division::with(['members' => fn ($query) => $query->orderBy('sort_order')])
+                ->where('name', 'BPH')
+                ->first();
+
+            if ($bphDivision && $bphDivision->members->isNotEmpty()) {
+                $ketua = $bphDivision->members->first();
+                $bphList = $bphDivision->members->slice(1)->values();
+            }
+
+            // Ambil 8 Divisi Pelaksana (selain Divisi BPH)
+            $divisions = Division::with(['members' => fn ($query) => $query->orderBy('sort_order')])
+                ->where('name', '!=', 'BPH')
+                ->orderBy('sort_order')
+                ->get();
         } catch (\Throwable $e) {
             // Fallback graceful jika database belum dikonfigurasi
         }
@@ -40,8 +52,9 @@ class AboutController extends Controller
                 'name' => 'M. Rayhan Pratama',
                 'nim' => 'F11122045',
                 'batch' => "'22",
-                'position' => 'Ketua',
+                'position' => 'Ketua Himpunan',
                 'bio' => 'Penanggung jawab umum arah kebijakan & kepemimpinan organisasi',
+                'photo_url' => asset('images/members/ketua.svg'),
             ];
         }
 
@@ -53,6 +66,7 @@ class AboutController extends Controller
                     'batch' => "'22",
                     'position' => 'Ketua 1',
                     'bio' => 'Koordinator bidang internal keorganisasian & sinkronisasi divisi.',
+                    'photo_url' => asset('images/members/ketua1.svg'),
                 ],
                 (object)[
                     'name' => 'Fadel Muhammad',
@@ -60,6 +74,7 @@ class AboutController extends Controller
                     'batch' => "'22",
                     'position' => 'Ketua 2',
                     'bio' => 'Koordinator bidang eksternal, kemitraan lembaga, & keprofesian.',
+                    'photo_url' => asset('images/members/ketua2.svg'),
                 ],
                 (object)[
                     'name' => 'Amanda Putri Lestari',
@@ -67,6 +82,7 @@ class AboutController extends Controller
                     'batch' => "'23",
                     'position' => 'Sekretaris Umum',
                     'bio' => 'Tata kelola persuratan, inventaris arsip, & administrasi kesekretariatan.',
+                    'photo_url' => asset('images/members/sekum.svg'),
                 ],
                 (object)[
                     'name' => 'Siti Nurhaliza',
@@ -74,6 +90,7 @@ class AboutController extends Controller
                     'batch' => "'23",
                     'position' => 'Bendahara Umum',
                     'bio' => 'Manajemen perbendaharaan kas, transparansi anggaran, & laporan keuangan.',
+                    'photo_url' => asset('images/members/bendum.svg'),
                 ],
             ]);
         }
@@ -83,50 +100,106 @@ class AboutController extends Controller
                 (object)[
                     'code' => 'DIVISI 01',
                     'name' => 'Ristek',
-                    'full_name' => 'Riset & Teknologi',
+                    'full_name' => 'Divisi Ristek',
                     'description' => 'Inovasi rekayasa konstruksi, material beton, dan teknologi rekayasa sipil.',
+                    'coordinator' => (object)[
+                        'name' => 'Bagus Wicaksono',
+                        'nim' => 'F11123002',
+                        'batch' => "'23",
+                        'position' => 'Koordinator Divisi Ristek',
+                        'photo_url' => asset('images/members/ristek.svg'),
+                    ],
                 ],
                 (object)[
                     'code' => 'DIVISI 02',
                     'name' => 'Infokom',
-                    'full_name' => 'Informasi & Komunikasi',
+                    'full_name' => 'Divisi Infokom',
                     'description' => 'Pengelolaan media resmi, publikasi digital, dan dokumentasi visual.',
+                    'coordinator' => (object)[
+                        'name' => 'Reza Pratama',
+                        'nim' => 'F11123041',
+                        'batch' => "'23",
+                        'position' => 'Koordinator Divisi Infokom',
+                        'photo_url' => asset('images/members/infokom.svg'),
+                    ],
                 ],
                 (object)[
                     'code' => 'DIVISI 03',
                     'name' => 'Penalaran',
-                    'full_name' => 'Penalaran Ilmiah & Prestasi',
+                    'full_name' => 'Divisi Penalaran',
                     'description' => 'Pendampingan lomba jembatan (KJI/KBGI), bimbingan akademik, & tutor sebaya.',
+                    'coordinator' => (object)[
+                        'name' => 'Annisa Salsabila',
+                        'nim' => 'F11123089',
+                        'batch' => "'23",
+                        'position' => 'Koordinator Divisi Penalaran',
+                        'photo_url' => asset('images/members/penalaran.svg'),
+                    ],
                 ],
                 (object)[
                     'code' => 'DIVISI 04',
                     'name' => 'FKMTSI',
-                    'full_name' => 'Forum Komunikasi Mahasiswa Teknik Sipil Indonesia',
+                    'full_name' => 'Divisi FKMTSI',
                     'description' => 'Hubungan koordinasi FKMTSI Wilayah VIII dan temu wicara nasional.',
+                    'coordinator' => (object)[
+                        'name' => 'Irfan Ramadhan',
+                        'nim' => 'F11123110',
+                        'batch' => "'23",
+                        'position' => 'Koordinator Divisi FKMTSI',
+                        'photo_url' => asset('images/members/fkmtsi.svg'),
+                    ],
                 ],
                 (object)[
                     'code' => 'DIVISI 05',
                     'name' => 'Hublua',
-                    'full_name' => 'Hubungan Luar & Alumni',
+                    'full_name' => 'Divisi Hublua',
                     'description' => 'Sinergi dengan instansi PUPR, BUMN Karya, LPJK, dan jejaring alumni.',
+                    'coordinator' => (object)[
+                        'name' => 'Kevin Alfarizi',
+                        'nim' => 'F11123023',
+                        'batch' => "'23",
+                        'position' => 'Koordinator Divisi Hublua',
+                        'photo_url' => asset('images/members/hublua.svg'),
+                    ],
                 ],
                 (object)[
                     'code' => 'DIVISI 06',
                     'name' => 'Bursa',
-                    'full_name' => 'Kewirausahaan Sipil',
+                    'full_name' => 'Divisi Bursa',
                     'description' => 'Pengadaan merchandise resmi, atribut keteknikan, dan kemandirian dana.',
+                    'coordinator' => (object)[
+                        'name' => 'Nadia Rahmawati',
+                        'nim' => 'F11123067',
+                        'batch' => "'23",
+                        'position' => 'Koordinator Divisi Bursa',
+                        'photo_url' => asset('images/members/bursa.svg'),
+                    ],
                 ],
                 (object)[
                     'code' => 'DIVISI 07',
                     'name' => 'Advokasi',
-                    'full_name' => 'Advokasi & Kesejahteraan Mahasiswa',
+                    'full_name' => 'Divisi Advokasi',
                     'description' => 'Penjaringan aspirasi civitas, advokasi sarana lab, dan perlindungan hak mahasiswa.',
+                    'coordinator' => (object)[
+                        'name' => 'Muhammad Tegar',
+                        'nim' => 'F11123078',
+                        'batch' => "'23",
+                        'position' => 'Koordinator Divisi Advokasi',
+                        'photo_url' => asset('images/members/advokasi.svg'),
+                    ],
                 ],
                 (object)[
                     'code' => 'DIVISI 08',
                     'name' => 'Kaderisasi',
-                    'full_name' => 'Pengembangan Sumber Daya Mahasiswa',
+                    'full_name' => 'Divisi Kaderisasi',
                     'description' => 'Pembinaan karakter moral calon insinyur, pelatihan kepemimpinan, & jiwa korsa.',
+                    'coordinator' => (object)[
+                        'name' => 'Fahri Hidayat',
+                        'nim' => 'F11123095',
+                        'batch' => "'23",
+                        'position' => 'Koordinator Divisi Kaderisasi',
+                        'photo_url' => asset('images/members/kaderisasi.svg'),
+                    ],
                 ],
             ]);
         }

@@ -18,7 +18,6 @@ class Member extends Model
         'division_id',
         'name',
         'nim',
-        'role_type',
         'position',
         'batch',
         'bio',
@@ -38,6 +37,24 @@ class Member extends Model
 
     public function isBph(): bool
     {
-        return in_array($this->role_type, ['ketua', 'bph'], true);
+        return $this->division?->name === 'BPH' || in_array($this->position, ['Ketua', 'Ketua Himpunan', 'Ketua 1', 'Ketua 2', 'Sekretaris Umum', 'Bendahara Umum'], true);
+    }
+
+    public function getPhotoUrlAttribute(): string
+    {
+        if ($this->photo_path) {
+            if (str_starts_with($this->photo_path, 'http://') || str_starts_with($this->photo_path, 'https://')) {
+                return $this->photo_path;
+            }
+            if (file_exists(public_path($this->photo_path))) {
+                return asset($this->photo_path);
+            }
+            if (\Illuminate\Support\Facades\Storage::disk('public')->exists($this->photo_path)) {
+                return \Illuminate\Support\Facades\Storage::disk('public')->url($this->photo_path);
+            }
+            return asset($this->photo_path);
+        }
+
+        return asset('images/members/placeholder.svg');
     }
 }

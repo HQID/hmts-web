@@ -342,46 +342,85 @@
     <!-- 6. SEKRETARIAT & PETA LOKASI INTERAKTIF -->
     <section class="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 border-t border-white/5">
         <div class="max-w-7xl mx-auto">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
 
-                <div class="lg:col-span-5 clean-card p-6 sm:p-8 space-y-6">
+                <div class="lg:col-span-5 clean-card p-6 sm:p-8 flex flex-col justify-between space-y-6 rounded-3xl border border-white/10">
                     <div>
-                        <span class="text-brand-yellow font-mono text-xs font-semibold uppercase block mb-1">Titik Pusat Kegiatan</span>
-                        <h3 class="font-display font-bold text-2xl text-white uppercase">Sekretariat HMTS FT-UNTAD</h3>
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-zinc-300 mb-3">
+                            <span class="w-1.5 h-1.5 rounded-full bg-brand-yellow"></span>
+                            <span>Titik Temu & Koordinasi</span>
+                        </div>
+                        <h3 class="font-display font-bold text-2xl sm:text-3xl text-white uppercase tracking-tight">Sekretariat HMTS FT-UNTAD</h3>
+                        <p class="text-xs text-zinc-400 font-sans mt-2 leading-relaxed">
+                            Pusat administrasi, koordinasi kegiatan mahasiswa, dan sekretariat resmi Himpunan Mahasiswa Teknik Sipil Universitas Tadulako.
+                        </p>
                     </div>
 
-                    <div class="space-y-4 font-mono text-xs text-zinc-300">
-                        <div class="p-4 rounded-xl bg-black/40 border border-white/5">
-                            <span class="text-zinc-500 block mb-1">Alamat Resmi:</span>
-                            <p class="text-white font-sans text-xs">Gedung Jurusan Teknik Sipil Lt. 1, Fakultas Teknik Universitas Tadulako, Jl. Soekarno-Hatta Km. 9, Tondo, Palu, Sulawesi Tengah 94118.</p>
+                    <div class="space-y-3.5 font-mono text-xs text-zinc-300">
+                        <div class="p-4 rounded-2xl bg-black/40 border border-white/5 space-y-1">
+                            <span class="text-zinc-500 text-[11px] uppercase tracking-wider block">Lokasi Sekretariat:</span>
+                            <p class="text-white font-sans text-xs leading-relaxed font-medium">
+                                Sekret Luar HMTS-FT UNTAD, Kampus Bumi Tadulako, Jl. Soekarno-Hatta Km. 9, Tondo, Kota Palu, Sulawesi Tengah 94118.
+                            </p>
                         </div>
-                        <div class="p-4 rounded-xl bg-black/40 border border-white/5 flex justify-between items-center">
-                            <div>
-                                <span class="text-zinc-500 block mb-1">Jam Operasional Piket:</span>
-                                <span class="text-white">Senin – Jumat : 08.00 – 17.00 WITA</span>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="p-3.5 rounded-2xl bg-black/40 border border-white/5">
+                                <span class="text-zinc-500 text-[11px] uppercase tracking-wider block mb-1">Email Resmi</span>
+                                <a href="mailto:sekretariat@hmts-untad.ac.id" class="text-white hover:text-brand-yellow font-sans text-xs font-semibold transition-colors truncate block">
+                                    sekretariat@hmts-untad.ac.id
+                                </a>
                             </div>
-                            <span class="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px]">Piket Aktif</span>
-                        </div>
-                        <div class="p-4 rounded-xl bg-black/40 border border-white/5">
-                            <span class="text-zinc-500 block mb-1">Saluran Komunikasi:</span>
-                            <div class="space-y-1 text-white">
-                                <div>Email: <a href="mailto:sekretariat@hmts-untad.ac.id" class="text-brand-yellow hover:underline">sekretariat@hmts-untad.ac.id</a></div>
-                                <div>Instagram: <span class="text-zinc-300">@hmts_ftuntad</span></div>
+                            <div class="p-3.5 rounded-2xl bg-black/40 border border-white/5">
+                                <span class="text-zinc-500 text-[11px] uppercase tracking-wider block mb-1">Instagram</span>
+                                <a href="https://instagram.com/hmts_ftuntad" target="_blank" rel="noopener noreferrer" class="text-white hover:text-brand-orange font-sans text-xs font-semibold transition-colors flex items-center justify-between">
+                                    <span>@hmts_ftuntad</span>
+                                    <span class="text-brand-orange text-[11px]">↗</span>
+                                </a>
                             </div>
                         </div>
+                    </div>
+
+                    <div class="pt-2 border-t border-white/5">
+                        <a href="https://www.google.com/maps/search/?api=1&query=Sekret+luar+HMTS-FT+UNTAD"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           class="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white px-5 py-3 font-mono text-xs font-bold uppercase tracking-wider transition-all shadow-md group">
+                            <span>Buka Rute di Google Maps</span>
+                            <span class="text-brand-yellow group-hover:translate-x-0.5 transition-transform">↗</span>
+                        </a>
                     </div>
                 </div>
 
                 <!-- Embed Google Maps -->
-                <div class="lg:col-span-7 clean-card p-2 sm:p-3 overflow-hidden h-[420px]">
-                    <iframe
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.3149950005726!2d119.89064407584102!3d-0.8358469991559869!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2d8be96df287d6cf%3A0x6b4539efae20485a!2sFakultas%20Teknik%20Universitas%20Tadulako!5e0!3m2!1sid!2sid!4v1700000000000!5m2!1sid!2sid"
-                        class="w-full h-full rounded-xl border border-white/10 filter contrast-125"
-                        style="border:0;"
-                        allowfullscreen=""
-                        loading="lazy"
-                        referrerpolicy="no-referrer-when-downgrade">
-                    </iframe>
+                <div class="lg:col-span-7 clean-card p-3 sm:p-4 overflow-hidden rounded-3xl border border-white/10 flex flex-col min-h-[420px] lg:min-h-[480px]">
+                    <div class="flex items-center justify-between pb-3 px-1 border-b border-white/10 mb-3 text-xs font-mono">
+                        <div class="flex items-center gap-2">
+                            <span class="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span class="font-bold text-white uppercase tracking-wider">Peta Lokasi Interaktif</span>
+                        </div>
+                        <span class="text-zinc-400 text-[11px]">Palu, Sulawesi Tengah</span>
+                    </div>
+
+                    <div class="relative w-full flex-1 rounded-2xl overflow-hidden border border-white/10 bg-[#121217]">
+                        <iframe
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d63829.427779882484!2d119.79293552167968!3d-0.887914799999987!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2d8bedd4f9ce9685%3A0xc78c66430365c5e3!2sSekret%20luar%20HMTS-FT%20UNTAD!5e0!3m2!1sid!2sid!4v1792241738768!5m2!1sid!2sid"
+                            class="w-full h-full border-0 filter grayscale-[20%] contrast-[1.05] brightness-[0.92] hover:grayscale-0 hover:brightness-100 transition-all duration-300"
+                            style="border:0;"
+                            allowfullscreen=""
+                            loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade">
+                        </iframe>
+
+                        <!-- Floating Location Badge -->
+                        <div class="absolute bottom-4 left-4 pointer-events-none rounded-xl border border-white/10 bg-[#0D0D12]/90 backdrop-blur-md px-3.5 py-2 text-xs font-mono shadow-xl hidden sm:block">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-brand-yellow"></span>
+                                <span class="text-white font-bold">Sekret Luar HMTS-FT UNTAD</span>
+                                <span class="text-zinc-500 text-[11px]">• Kampus Bumi Tadulako</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
             </div>

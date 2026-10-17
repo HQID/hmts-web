@@ -28,32 +28,38 @@ class ManagementController extends Controller
         $definition = $this->definition($module);
         $model = $definition['model'];
 
+        $records = $module === 'members'
+            ? Member::with('division')->orderBy('sort_order')->paginate(20)
+            : $model::query()->latest()->paginate(15);
+
         return view('app.management.index', [
             'module' => $module,
             'definition' => $definition,
-            'records' => $model::query()->latest()->paginate(15),
+            'records' => $records,
             'divisions' => Division::orderBy('sort_order')->get(['id', 'name']),
             'programs' => Program::orderBy('starts_at')->get(['id', 'title']),
+            'currentPeriod' => Period::current(),
         ]);
     }
 
     public function store(Request $request, string $module): RedirectResponse
     {
+        if ($module === 'members') {
+            return redirect()->route('app.members.index')
+                ->with('status', 'Penambahan anggota baru dinonaktifkan. Pengurus dikelola melalui tombol Sunting.');
+        }
+
         $definition = $this->definition($module);
         $periodId = Period::current()?->id ?? abort(422, 'Tidak ada periode aktif.');
         $rules = $definition['rules'];
-        if ($module === 'members') {
-            $rules['division_id'] = ['nullable', Rule::exists('divisions', 'id')->where('period_id', $periodId)];
-        } elseif ($module === 'meeting-notes') {
+        if ($module === 'meeting-notes') {
             $rules['program_id'] = ['nullable', Rule::exists('programs', 'id')->where('period_id', $periodId)];
         }
         $data = $request->validate($rules);
         $model = $definition['model'];
         $data['period_id'] = $periodId;
 
-        if ($module === 'members') {
-            $data['sort_order'] = $data['sort_order'] ?? 0;
-        } elseif ($module === 'inventory') {
+        if ($module === 'inventory') {
             $data['is_active'] = $request->boolean('is_active');
         }
 
@@ -86,6 +92,65 @@ class ManagementController extends Controller
         return back()->with('status', 'Data berhasil disimpan.');
     }
 
+    public function editMember(Member $member): View
+    {
+        return view('app.management.index', [
+            'module' => 'members',
+            'definition' => $this->definition('members'),
+            'records' => Member::with('division')->orderBy('sort_order')->paginate(20),
+            'divisions' => Division::orderBy('sort_order')->get(['id', 'name']),
+            'programs' => collect(),
+            'editing' => $member,
+            'currentPeriod' => Period::current(),
+        ]);
+    }
+
+    public function updatePeriod(Request $request, Period $period): RedirectResponse
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'start_year' => 'required|integer|min:2000|max:65535',
+            'end_year' => 'required|integer|gte:start_year|max:65535',
+        ]);
+
+        $period->update($data);
+        cache()->forget('active_period_id');
+
+        return back()->with('status', 'Periode kepengurusan berhasil diperbarui menjadi ' . $period->name . '.');
+    }
+
+    public function updateMember(Request $request, Member $member): RedirectResponse
+    {
+        $periodId = $member->period_id;
+        $rules = [
+            'name' => 'required|string|max:255',
+            'nim' => 'nullable|string|max:30',
+            'division_id' => ['nullable', Rule::exists('divisions', 'id')->where('period_id', $periodId)],
+            'position' => 'required|string|max:255',
+            'batch' => 'nullable|string|max:10',
+            'bio' => 'nullable|string|max:255',
+            'photo' => 'nullable|image|max:3072',
+            'photo_path' => 'nullable|string|max:255',
+            'sort_order' => 'nullable|integer|min:0|max:65535',
+        ];
+
+        $data = $request->validate($rules);
+        $data['sort_order'] = $data['sort_order'] ?? 0;
+
+        if ($request->hasFile('photo')) {
+            $path = $request->file('photo')->store('members', 'public');
+            $data['photo_path'] = $path;
+        } elseif (empty($data['photo_path'])) {
+            $data['photo_path'] = $member->photo_path;
+        }
+
+        unset($data['photo']);
+
+        $member->update($data);
+
+        return redirect()->route('app.members.index')->with('status', 'Data pengurus ' . $member->name . ' berhasil diperbarui.');
+    }
+
     public function editProgram(Program $program): View
     {
         return view('app.management.index', [
@@ -108,7 +173,7 @@ class ManagementController extends Controller
     private function definition(string $module): array
     {
         return match ($module) {
-            'members' => ['title' => 'Anggota & Divisi', 'model' => Member::class, 'attributes' => ['period_id', 'division_id', 'name', 'nim', 'role_type', 'position', 'batch', 'bio', 'sort_order'], 'rules' => ['name' => 'required|string|max:255', 'nim' => 'nullable|string|max:30', 'division_id' => 'nullable|exists:divisions,id', 'role_type' => 'required|in:ketua,bph,coordinator,staff', 'position' => 'required|string|max:255', 'batch' => 'nullable|string|max:10', 'bio' => 'nullable|string|max:255', 'sort_order' => 'nullable|integer|min:0|max:65535'], 'columns' => ['name' => 'Nama', 'nim' => 'NIM', 'position' => 'Jabatan']],
+            'members' => ['title' => 'Kepengurusan', 'model' => Member::class, 'attributes' => ['period_id', 'division_id', 'name', 'nim', 'position', 'batch', 'bio', 'photo_path', 'sort_order'], 'rules' => ['name' => 'required|string|max:255', 'nim' => 'nullable|string|max:30', 'division_id' => 'nullable|exists:divisions,id', 'position' => 'required|string|max:255', 'batch' => 'nullable|string|max:10', 'bio' => 'nullable|string|max:255', 'photo_path' => 'nullable|string|max:255', 'sort_order' => 'nullable|integer|min:0|max:65535'], 'columns' => ['name' => 'Nama', 'nim' => 'NIM', 'position' => 'Jabatan']],
             'programs' => ['title' => 'Program Kerja & Panitia', 'model' => Program::class, 'attributes' => ['period_id', 'title', 'category', 'description', 'starts_at', 'ends_at', 'location', 'status'], 'rules' => ['title' => 'required|string|max:255', 'category' => 'required|in:competition,workshop,community,seminar', 'description' => 'nullable|string|max:5000', 'starts_at' => 'nullable|date', 'ends_at' => 'nullable|date|after_or_equal:starts_at', 'location' => 'nullable|string|max:255', 'status' => 'required|in:rencana,aktif,selesai,dibatalkan'], 'columns' => ['title' => 'Program', 'category' => 'Kategori', 'status' => 'Status']],
             'inventory' => ['title' => 'Inventaris', 'model' => Inventory::class, 'attributes' => ['period_id', 'name', 'code', 'category', 'specification', 'total_qty', 'available_qty', 'condition', 'is_active'], 'rules' => ['name' => 'required|string|max:255', 'code' => 'required|string|max:40|unique:inventories,code', 'category' => 'nullable|string|max:255', 'specification' => 'nullable|string|max:5000', 'total_qty' => 'required|integer|min:0|max:4294967295', 'available_qty' => 'required|integer|min:0|max:4294967295|lte:total_qty', 'condition' => 'required|in:baik,rusak_ringan,rusak_berat', 'is_active' => 'nullable|boolean'], 'columns' => ['name' => 'Aset', 'code' => 'Kode', 'total_qty' => 'Jumlah']],
             'attendance' => ['title' => 'Sesi Presensi QR', 'model' => AttendanceSession::class, 'attributes' => ['period_id', 'title', 'location', 'starts_at', 'ends_at', 'token_hash', 'token_expires_at', 'status', 'created_by_user_id'], 'rules' => ['title' => 'required|string|max:255', 'location' => 'nullable|string|max:255', 'starts_at' => 'required|date', 'ends_at' => 'required|date|after:starts_at', 'status' => 'required|in:draft,aktif,selesai'], 'columns' => ['title' => 'Sesi', 'starts_at' => 'Mulai', 'status' => 'Status']],
