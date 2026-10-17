@@ -95,6 +95,7 @@
                             <span class="text-xs font-mono text-zinc-400">Instrumen terpilih: <span class="text-brand-yellow font-bold">{{ $borrowTool }}</span></span>
                         </div>
 
+                        @error('borrowInventoryId') <p role="alert" class="mb-4 text-xs text-red-400">{{ $message }}</p> @enderror
                         @if ($borrowSuccess)
                             <div class="p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-center font-mono text-xs space-y-2">
                                 <div class="text-lg font-bold">✓ Pengajuan Peminjaman Berhasil Dikirim!</div>
@@ -108,12 +109,12 @@
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-zinc-300 font-semibold mb-1 uppercase">Nama Lengkap Mahasiswa</label>
-                                        <input type="text" wire:model="borrowName" required placeholder="Contoh: Muhammad Raihan" class="w-full bg-[#181822] border border-white/10 focus:border-brand-orange rounded-xl px-4 py-2.5 text-white outline-none">
+                                        <input type="text" wire:model="borrowName" required maxlength="255" placeholder="Contoh: Muhammad Raihan" class="w-full bg-[#181822] border border-white/10 focus:border-brand-orange rounded-xl px-4 py-2.5 text-white outline-none">
                                         @error('borrowName') <span class="text-red-400 text-[10px]">{{ $message }}</span> @enderror
                                     </div>
                                     <div>
                                         <label class="block text-zinc-300 font-semibold mb-1 uppercase">NIM Mahasiswa</label>
-                                        <input type="text" wire:model="borrowNim" required placeholder="F111XXXXX" class="w-full bg-[#181822] border border-white/10 focus:border-brand-orange rounded-xl px-4 py-2.5 text-white outline-none">
+                                        <input type="text" wire:model="borrowNim" required maxlength="30" placeholder="F111XXXXX" class="w-full bg-[#181822] border border-white/10 focus:border-brand-orange rounded-xl px-4 py-2.5 text-white outline-none">
                                         @error('borrowNim') <span class="text-red-400 text-[10px]">{{ $message }}</span> @enderror
                                     </div>
                                 </div>
@@ -133,7 +134,7 @@
 
                                 <div>
                                     <label class="block text-zinc-300 font-semibold mb-1 uppercase">Keperluan Peminjaman</label>
-                                    <textarea wire:model="borrowPurpose" rows="2" required placeholder="Praktikum Ilmu Ukur Tanah / Tugas Akhir Pemetaan Topografi..." class="w-full bg-[#181822] border border-white/10 focus:border-brand-orange rounded-xl px-4 py-2 text-white outline-none font-sans text-xs"></textarea>
+                                    <textarea wire:model="borrowPurpose" rows="2" required maxlength="5000" placeholder="Praktikum Ilmu Ukur Tanah / Tugas Akhir Pemetaan Topografi..." class="w-full bg-[#181822] border border-white/10 focus:border-brand-orange rounded-xl px-4 py-2 text-white outline-none font-sans text-xs"></textarea>
                                     @error('borrowPurpose') <span class="text-red-400 text-[10px]">{{ $message }}</span> @enderror
                                 </div>
 
@@ -173,7 +174,7 @@
                     <form wire:submit.prevent="submitAttendance" class="space-y-4 max-w-sm mx-auto font-mono text-xs text-left">
                         <div>
                             <label class="block text-zinc-300 font-semibold mb-1 uppercase">NIM Mahasiswa</label>
-                            <input type="text" wire:model="qrNim" required placeholder="F111XXXXX" class="w-full bg-[#181822] border border-white/10 focus:border-brand-orange rounded-xl px-4 py-2.5 text-white outline-none">
+                            <input type="text" wire:model="qrNim" required maxlength="30" placeholder="F111XXXXX" class="w-full bg-[#181822] border border-white/10 focus:border-brand-orange rounded-xl px-4 py-2.5 text-white outline-none">
                             @error('qrNim') <span class="text-red-400 text-[10px]">{{ $message }}</span> @enderror
                         </div>
 
@@ -219,6 +220,9 @@
                             </div>
                         @else
                             <form wire:submit.prevent="submitAspiration" class="space-y-4 font-mono text-xs">
+                                <div class="hidden" aria-hidden="true" style="display: none;">
+                                    <input type="text" wire:model="aspirationHoneypot" tabindex="-1" autocomplete="off">
+                                </div>
                                 <div>
                                     <label class="block text-zinc-300 font-semibold mb-1 uppercase">Kategori Aspirasi</label>
                                     <select wire:model="aspirationCategory" class="w-full bg-[#181822] border border-white/10 focus:border-brand-orange rounded-xl text-white px-4 py-2.5 outline-none font-sans text-xs">

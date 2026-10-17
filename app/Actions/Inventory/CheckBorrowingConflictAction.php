@@ -12,7 +12,7 @@ class CheckBorrowingConflictAction
     {
         $reservedQuantity = $inventory->borrowingItems()
             ->whereHas('borrowing', function ($query) use ($start, $end, $excludeBorrowingId) {
-                $query->whereIn('status', ['disetujui', 'sedang_dipinjam'])
+                $query->whereIn('status', ['disetujui', 'dipinjam', 'sedang_dipinjam'])
                     ->where('start_time', '<', $end)
                     ->where('expected_return_time', '>', $start)
                     ->when($excludeBorrowingId, fn ($query) => $query->where('borrowings.id', '!=', $excludeBorrowingId));

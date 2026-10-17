@@ -26,7 +26,9 @@ class ActivePeriodScope implements Scope
         });
 
         if ($periodId) {
-            $builder->where($model->getTable() . '.period_id', $periodId);
+            $builder->where($model->getTable().'.period_id', $periodId);
+        } else {
+            $builder->whereRaw('1 = 0');
         }
     }
 }

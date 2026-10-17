@@ -7,6 +7,7 @@ use App\Models\Inventory;
 use App\Models\Period;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 class CreateBorrowingRequestAction
@@ -15,6 +16,12 @@ class CreateBorrowingRequestAction
 
     public function execute(Period $period, Inventory $inventory, array $request, CarbonInterface $start, CarbonInterface $end): Borrowing
     {
+        $request = Validator::make($request, [
+            'requester_name' => 'required|string|min:3|max:255',
+            'requester_nim' => 'required|string|min:5|max:30',
+            'purpose' => 'required|string|min:5|max:5000',
+        ])->validate();
+
         if ($inventory->period_id !== $period->id || ! $inventory->is_active) {
             throw ValidationException::withMessages(['inventory' => 'Alat tidak tersedia pada periode aktif.']);
         }

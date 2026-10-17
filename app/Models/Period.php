@@ -36,8 +36,27 @@ class Period extends Model
         return $this->hasMany(Member::class)->orderBy('sort_order');
     }
 
+    protected static function booted(): void
+    {
+        static::saved(function () {
+            cache()->forget('active_period_id');
+        });
+
+        static::deleted(function () {
+            cache()->forget('active_period_id');
+        });
+    }
+
     public static function current(): ?self
     {
-        return static::where('is_active', true)->first();
+        $id = cache()->remember('active_period_id', 3600, function () {
+            try {
+                return static::where('is_active', true)->value('id');
+            } catch (\Throwable $e) {
+                return null;
+            }
+        });
+
+        return $id ? static::find($id) : static::where('is_active', true)->first();
     }
 }

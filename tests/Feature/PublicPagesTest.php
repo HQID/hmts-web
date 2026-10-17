@@ -8,6 +8,7 @@ use Tests\TestCase;
 class PublicPagesTest extends TestCase
 {
     use RefreshDatabase;
+
     public function test_home_page_returns_successful_response(): void
     {
         $response = $this->get('/');
@@ -35,7 +36,7 @@ class PublicPagesTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('Program Kerja');
-        $response->assertSee('Civil Expo');
+        $response->assertSee('Tidak ada program kerja');
     }
 
     public function test_services_page_returns_successful_response(): void

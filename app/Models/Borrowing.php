@@ -18,6 +18,16 @@ class Borrowing extends Model
         return ['start_time' => 'datetime', 'expected_return_time' => 'datetime', 'returned_at' => 'datetime'];
     }
 
+    public function allowedStatuses(): array
+    {
+        return match ($this->status) {
+            'menunggu' => ['disetujui', 'ditolak'],
+            'disetujui' => ['dipinjam', 'ditolak'],
+            'dipinjam', 'sedang_dipinjam' => ['dikembalikan'],
+            default => [],
+        };
+    }
+
     public function period(): BelongsTo { return $this->belongsTo(Period::class); }
     public function items(): HasMany { return $this->hasMany(BorrowingItem::class); }
     public function verifiedBy(): BelongsTo { return $this->belongsTo(User::class, 'verified_by_user_id'); }
