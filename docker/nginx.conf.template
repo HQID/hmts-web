@@ -1,5 +1,6 @@
+user www-data;
 worker_processes auto;
-error_log /var/log/nginx/error.log warn;
+error_log /dev/stderr warn;
 pid /run/nginx.pid;
 
 events {
@@ -14,7 +15,7 @@ http {
                     '$status $body_bytes_sent "$http_referer" '
                     '"$http_user_agent" "$http_x_forwarded_for"';
 
-    access_log /var/log/nginx/access.log main;
+    access_log /dev/stdout main;
 
     sendfile on;
     tcp_nopush on;
@@ -31,7 +32,7 @@ http {
     gzip_types text/plain text/css text/xml application/json application/javascript application/rss+xml application/atom+xml image/svg+xml;
 
     server {
-        listen __PORT__;
+        __LISTEN_DIRECTIVES__
         server_name _;
         root /var/www/html/public;
 
@@ -53,7 +54,7 @@ http {
         error_page 404 /index.php;
 
         location ~ \.php$ {
-            fastcgi_pass 127.0.0.1:9000;
+            fastcgi_pass unix:/run/php-fpm.sock;
             fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
             include fastcgi_params;
             fastcgi_hide_header X-Powered-By;

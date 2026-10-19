@@ -1,17 +1,25 @@
 #!/bin/bash
 set -e
 
-# 1. Setup Railway Port
-PORT=${PORT:-80}
-echo "==> Configuring Nginx port to ${PORT}..."
-sed "s/__PORT__/${PORT}/g" /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
+# 1. Setup Railway Port & Nginx Listen Directives
+PORT=${PORT:-8080}
+echo "==> Configuring Nginx to listen on port ${PORT} (and fallback port 80)..."
 
-# 2. Ensure storage and bootstrap directories exist
+if [ "$PORT" != "80" ]; then
+    LISTEN_DIRECTIVES="listen ${PORT}; listen 80;"
+else
+    LISTEN_DIRECTIVES="listen 80;"
+fi
+
+sed "s|__LISTEN_DIRECTIVES__|${LISTEN_DIRECTIVES}|g" /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
+
+# 2. Ensure runtime, storage and bootstrap directories exist with proper permissions
+mkdir -p /run /run/nginx /var/log/nginx /var/log/supervisor
 mkdir -p /var/www/html/storage/framework/{sessions,views,cache}
 mkdir -p /var/www/html/storage/logs
 mkdir -p /var/www/html/bootstrap/cache
 
-# Fix permissions
+chown -R www-data:www-data /run /var/log/nginx /var/log/supervisor
 chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 

@@ -63,6 +63,7 @@ RUN cp -n .env.example .env || true && \
 # Copy configuration files
 COPY docker/nginx.conf.template /etc/nginx/nginx.conf.template
 COPY docker/php.ini /usr/local/etc/php/conf.d/custom.ini
+COPY docker/zz-custom.conf /usr/local/etc/php-fpm.d/zz-custom.conf
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 
@@ -71,11 +72,11 @@ RUN sed -i -e 's/\r$//' /usr/local/bin/entrypoint.sh && \
     chmod +x /usr/local/bin/entrypoint.sh
 
 # Create runtime directories and set proper permissions
-RUN mkdir -p /run/nginx /var/log/nginx /var/log/supervisor && \
+RUN mkdir -p /run /run/nginx /var/log/nginx /var/log/supervisor && \
     mkdir -p storage/framework/{sessions,views,cache} storage/logs bootstrap/cache && \
-    chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache && \
+    chown -R www-data:www-data /run /var/www/html/storage /var/www/html/bootstrap/cache && \
     chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-EXPOSE 80
+EXPOSE 80 8080
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
