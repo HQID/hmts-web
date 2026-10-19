@@ -11,6 +11,7 @@ use App\Models\Member;
 use App\Models\Period;
 use App\Models\Program;
 use App\Models\User;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -67,7 +68,7 @@ class CommandCenterTest extends TestCase
         try {
             app(VoidCashTransactionAction::class)->execute($transaction, 'Kesalahan input nominal transaksi.', $admin);
             $this->fail('Admin tidak boleh membatalkan transaksi kas.');
-        } catch (\Illuminate\Auth\Access\AuthorizationException) {
+        } catch (AuthorizationException) {
             $this->assertDatabaseHas('cash_transactions', ['id' => $transaction->id, 'status' => 'posted']);
         }
 
@@ -137,9 +138,9 @@ class CommandCenterTest extends TestCase
         Storage::disk('public')->assertExists($member->photo_path);
     }
 
-    public function test_admin_can_update_active_period_from_kepengurusan(): void
+    public function test_superadmin_can_update_active_period_from_kepengurusan(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->create(['role' => 'superadmin']);
         $period = Period::create(['name' => '2026/2027', 'start_year' => 2026, 'end_year' => 2027, 'is_active' => true]);
 
         $response = $this->actingAs($admin)->get('/app/anggota');
@@ -190,7 +191,7 @@ class CommandCenterTest extends TestCase
 
     public function test_admin_can_upload_file_for_meeting_note_and_download_it(): void
     {
-        Storage::fake('public');
+        Storage::fake('private');
         $admin = User::factory()->create(['role' => 'admin']);
         $period = Period::create(['name' => '2026/2027', 'start_year' => 2026, 'end_year' => 2027, 'is_active' => true]);
 
@@ -206,9 +207,9 @@ class CommandCenterTest extends TestCase
         $note = MeetingNote::firstWhere('title', 'Notulensi Rapat Pleno');
         $this->assertNotNull($note);
         $this->assertNotNull($note->file_path);
-        Storage::disk('public')->assertExists($note->file_path);
+        Storage::disk('private')->assertExists($note->file_path);
 
-        $downloadResponse = $this->actingAs($admin)->get('/app/notulensi/'.$note->id.'/unduh');
+        $downloadResponse = $this->actingAs($admin)->get($note->file_url);
         $downloadResponse->assertOk();
     }
 

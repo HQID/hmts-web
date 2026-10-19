@@ -5,7 +5,9 @@ namespace App\Actions\Attendance;
 use App\Models\Attendance;
 use App\Models\AttendanceSession;
 use App\Models\Member;
+use App\Models\Period;
 use Illuminate\Database\UniqueConstraintViolationException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -19,7 +21,7 @@ class RecordAttendanceAction
             'token' => 'required|string|digits:6',
         ])->validate();
 
-        if ($session->status !== 'aktif' || ! $session->token_expires_at || $session->token_expires_at->isPast() || ! Hash::check($token, $session->token_hash)) {
+        if (! $session->isOpen() || ! $session->token_expires_at || ! $session->token_expires_at->isFuture() || ! Hash::check($token, $session->token_hash)) {
             throw ValidationException::withMessages(['token' => 'Token presensi tidak valid atau sudah kedaluwarsa.']);
         }
 

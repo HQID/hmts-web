@@ -30,11 +30,14 @@ class CreateBorrowingRequestAction
             throw ValidationException::withMessages(['expected_return_time' => 'Waktu pengembalian harus setelah waktu mulai.']);
         }
 
-        if (! $this->conflicts->isAvailable($inventory, 1, $start, $end)) {
-            throw ValidationException::withMessages(['inventory' => 'Alat sudah penuh pada rentang waktu yang dipilih.']);
-        }
-
         return DB::transaction(function () use ($period, $inventory, $request, $start, $end) {
+            if (! Period::lockForUpdate()->findOrFail($period->id)->is_active) {
+                throw ValidationException::withMessages(['inventory' => 'Periode peminjaman sudah tidak aktif.']);
+            }
+            $inventory = Inventory::withoutGlobalScopes()->where('period_id', $period->id)->lockForUpdate()->findOrFail($inventory->id);
+            if (! $this->conflicts->isAvailable($inventory, 1, $start, $end)) {
+                throw ValidationException::withMessages(['inventory' => 'Alat sudah penuh pada rentang waktu yang dipilih.']);
+            }
             $borrowing = Borrowing::query()->create([
                 'period_id' => $period->id,
                 'requester_name' => $request['requester_name'],

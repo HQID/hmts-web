@@ -5,8 +5,8 @@ namespace Tests\Feature;
 use App\Actions\Attendance\GenerateDynamicQrTokenAction;
 use App\Actions\Attendance\RecordAttendanceAction;
 use App\Actions\Inventory\UpdateBorrowingStatusAction;
+use App\Livewire\Public\ServiceHub;
 use App\Models\Aspiration;
-use App\Models\Attendance;
 use App\Models\AttendanceSession;
 use App\Models\Borrowing;
 use App\Models\BorrowingItem;
@@ -26,6 +26,7 @@ class OperationsFlowTest extends TestCase
     private function admin(): array
     {
         $period = Period::create(['name' => '2026/2027', 'start_year' => 2026, 'end_year' => 2027, 'is_active' => true]);
+
         return [$period, User::factory()->create(['role' => 'admin'])];
     }
 
@@ -40,7 +41,7 @@ class OperationsFlowTest extends TestCase
             ->assertRedirect();
 
         $this->assertDatabaseHas('borrowings', ['id' => $borrowing->id, 'status' => 'disetujui', 'verified_by_user_id' => $admin->id]);
-        $this->assertDatabaseHas('inventories', ['id' => $inventory->id, 'available_qty' => 1]);
+        $this->assertDatabaseHas('inventories', ['id' => $inventory->id, 'available_qty' => 2]);
     }
 
     public function test_admin_can_moderate_an_anonymous_aspiration(): void
@@ -139,14 +140,15 @@ class OperationsFlowTest extends TestCase
 
         $updateAction = app(UpdateBorrowingStatusAction::class);
 
-        // 1. menunggu -> disetujui (stock decremented)
+        // Approval reserves the schedule; handover changes physical stock.
         $updateAction->execute($borrowing->id, 'disetujui', 'Disetujui', $admin);
         $this->assertSame('disetujui', $borrowing->fresh()->status);
-        $this->assertSame(2, $inventory->fresh()->available_qty);
+        $this->assertSame(3, $inventory->fresh()->available_qty);
 
         // 2. disetujui -> dipinjam
         $updateAction->execute($borrowing->id, 'dipinjam', 'Diambil peminjam', $admin);
         $this->assertSame('dipinjam', $borrowing->fresh()->status);
+        $this->assertSame(2, $inventory->fresh()->available_qty);
 
         // 3. dipinjam -> dikembalikan (stock restored)
         $updateAction->execute($borrowing->id, 'dikembalikan', 'Selesai peminjaman', $admin);
@@ -173,7 +175,7 @@ class OperationsFlowTest extends TestCase
     {
         [$period] = $this->admin();
 
-        Livewire::test(\App\Livewire\Public\ServiceHub::class)
+        Livewire::test(ServiceHub::class)
             ->set('aspirationCategory', 'Fasilitas & Lab')
             ->set('aspirationMessage', 'Pesan spam otomatis dari robot internet.')
             ->set('aspirationHoneypot', 'i-am-a-bot')

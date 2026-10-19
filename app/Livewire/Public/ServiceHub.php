@@ -43,6 +43,9 @@ class ServiceHub extends Component
     // Presensi QR
     public string $qrToken = '';
 
+    #[Url(as: 'session')]
+    public string $qrSessionId = '';
+
     public string $qrNim = '';
 
     public string $qrAttendanceStatus = '';
@@ -72,6 +75,12 @@ class ServiceHub extends Component
             $this->activeTab = 'qr';
             $this->qrToken = (string) request()->query('token');
         }
+        if (request()->filled('session')) {
+            $this->qrSessionId = (string) request()->query('session');
+        }
+        if ($this->qrSessionId === '' && AttendanceSession::open()->count() === 1) {
+            $this->qrSessionId = (string) AttendanceSession::open()->value('id');
+        }
     }
 
     public function setTab(string $tab): void
@@ -84,6 +93,7 @@ class ServiceHub extends Component
         $inventory = Inventory::findOrFail($inventoryId);
         $this->borrowInventoryId = $inventory->id;
         $this->borrowTool = $inventory->name;
+        $this->dispatch('inventory-selected');
     }
 
     public function submitBorrowForm(CreateBorrowingRequestAction $action): void
@@ -114,7 +124,7 @@ class ServiceHub extends Component
                 'requester_name' => $this->borrowName,
                 'requester_nim' => $this->borrowNim,
                 'purpose' => $this->borrowPurpose,
-            ], Carbon::parse($this->borrowStartDate)->startOfDay(), Carbon::parse($this->borrowEndDate)->endOfDay());
+            ], Carbon::parse($this->borrowStartDate)->startOfDay(), Carbon::parse($this->borrowEndDate)->addDay()->startOfDay());
             $this->borrowSuccess = true;
         } catch (ValidationException $exception) {
             $fields = ['inventory' => 'borrowInventoryId', 'expected_return_time' => 'borrowEndDate', 'requester_name' => 'borrowName', 'requester_nim' => 'borrowNim', 'purpose' => 'borrowPurpose'];
@@ -136,12 +146,25 @@ class ServiceHub extends Component
 
     public function submitAttendance(RecordAttendanceAction $action): void
     {
+        $this->qrAttendanceStatus = '';
+        if ($this->qrSessionId === '') {
+            $sessions = AttendanceSession::open()->get(['id']);
+            if ($sessions->isEmpty()) {
+                $this->addError('qrToken', 'Tidak ada sesi presensi aktif saat ini.');
+
+                return;
+            }
+            if ($sessions->count() === 1) {
+                $this->qrSessionId = (string) $sessions->first()->id;
+            }
+        }
         $this->validate([
+            'qrSessionId' => 'required|integer|min:1',
             'qrToken' => 'required|digits:6',
             'qrNim' => 'required|string|min:5|max:30',
         ]);
 
-        $session = AttendanceSession::query()->where('status', 'aktif')->where('starts_at', '<=', now())->where('ends_at', '>=', now())->latest('starts_at')->first();
+        $session = AttendanceSession::query()->find((int) $this->qrSessionId);
         if (! $session) {
             $this->addError('qrToken', 'Tidak ada sesi presensi aktif saat ini.');
 
@@ -232,6 +255,7 @@ class ServiceHub extends Component
     public function render()
     {
         return view('livewire.public.service-hub', [
+            'attendanceSessions' => AttendanceSession::open()->orderBy('starts_at')->get(),
             'tools' => Inventory::query()->where('is_active', true)->orderBy('name')->get(),
             'assets' => DesignAsset::query()->where('is_public', true)->orderBy('title')->get(),
         ]);

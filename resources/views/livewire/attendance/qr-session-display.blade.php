@@ -79,22 +79,12 @@
         <!-- Kolom Kiri: Display QR Code Dinamis & Token -->
         <div class="lg:col-span-7 clean-card p-6 sm:p-8 flex flex-col items-center justify-center text-center space-y-6"
              x-data="{
-                remaining: 30,
-                progress: 100,
-                init() {
-                    setInterval(() => {
-                        if (this.remaining > 0) {
-                            this.remaining--;
-                            this.progress = Math.max(0, (this.remaining / 30) * 100);
-                        }
-                    }, 1000);
-                    $wire.on('qrRefreshed', () => {
-                        this.remaining = 30;
-                        this.progress = 100;
-                    });
-                }
-             }"
-             wire:poll.30s="refreshQr">
+                expires: $wire.entangle('qrExpiresAt'), clock: Date.now(), timer: null,
+                get remaining() { return Math.max(0, Math.ceil(((this.expires || 0) * 1000 - this.clock) / 1000)); },
+                get progress() { return Math.min(100, this.remaining / 30 * 100); },
+                init() { this.timer = setInterval(() => this.clock = Date.now(), 500); },
+                destroy() { clearInterval(this.timer); }
+             }" wire:poll.5s="refreshQr">
 
             <div class="space-y-1">
                 <span class="font-mono text-xs uppercase tracking-widest text-brand-yellow font-semibold">Dynamic Token Engine</span>
@@ -226,6 +216,14 @@ Alpine.data('qrCameraScanner', () => ({
         const match = decodedText.match(/(?:token=|\b)(\d{6})\b/);
         const token = match ? match[1] : decodedText;
 
+        try {
+            const url = new URL(decodedText);
+            const session = url.searchParams.get('session');
+            if (session && session !== String($wire.get('sessionId'))) {
+                $wire.set('scanResult', { status: 'error', message: 'QR berasal dari sesi lain.' });
+                return;
+            }
+        } catch {}
         $wire.set('scanTokenInput', token);
 
         // If NIM is already filled, automatically submit

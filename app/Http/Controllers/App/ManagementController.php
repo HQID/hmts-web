@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\App;
 
+use App\Actions\Inventory\CheckBorrowingConflictAction;
 use App\Http\Controllers\Controller;
 use App\Models\AttendanceSession;
 use App\Models\DesignAsset;
@@ -12,10 +13,13 @@ use App\Models\MeetingNote;
 use App\Models\Member;
 use App\Models\Period;
 use App\Models\Program;
+use Carbon\Carbon;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -30,7 +34,7 @@ class ManagementController extends Controller
         $model = $definition['model'];
 
         $records = $module === 'members'
-            ? Member::with('division')->orderBy('sort_order')->paginate(20)
+            ? Member::with('division')->orderBy('sort_order')->paginate(100)
             : $model::query()->latest()->paginate(15);
 
         return view('app.management.index', [
@@ -51,10 +55,10 @@ class ManagementController extends Controller
         }
 
         foreach (['starts_at', 'ends_at', 'held_at'] as $dtField) {
-            if ($request->filled($dtField . '_date')) {
-                $time = $request->input($dtField . '_time') ?: ($dtField === 'held_at' ? '09:00' : '08:00');
+            if ($request->filled($dtField.'_date')) {
+                $time = $request->input($dtField.'_time') ?: ($dtField === 'held_at' ? '09:00' : '08:00');
                 $request->merge([
-                    $dtField => $request->input($dtField . '_date') . ' ' . $time,
+                    $dtField => $request->input($dtField.'_date').' '.$time,
                 ]);
             }
         }
@@ -62,12 +66,22 @@ class ManagementController extends Controller
         $definition = $this->definition($module);
         $periodId = Period::current()?->id ?? abort(422, 'Tidak ada periode aktif.');
         $rules = $definition['rules'];
+        if ($module === 'members') {
+            $rules['division_id'] = ['nullable', Rule::exists('divisions', 'id')->where('period_id', $periodId)];
+            $rules['photo'] = 'nullable|image|max:3072';
+        }
         if ($module === 'meeting-notes') {
             $rules['program_id'] = ['nullable', Rule::exists('programs', 'id')->where('period_id', $periodId)];
         }
         $data = $request->validate($rules);
         $model = $definition['model'];
         $data['period_id'] = $periodId;
+        if ($module === 'members') {
+            $data['photo_path'] = $request->file('photo')?->store('members', 'public');
+            if ($request->hasFile('photo')) {
+                abort_unless($data['photo_path'], 500, 'Foto gagal disimpan.');
+            }
+        }
 
         if ($module === 'inventory') {
             $data['is_active'] = $request->boolean('is_active');
@@ -92,19 +106,33 @@ class ManagementController extends Controller
 
         if ($module === 'meeting-notes') {
             if ($request->hasFile('file')) {
-                $data['file_path'] = $request->file('file')->store('meeting-notes', 'public');
+                $data['file_path'] = $request->file('file')->store('meeting-notes', 'private');
+                abort_unless($data['file_path'], 500, 'Berkas gagal disimpan.');
             } else {
                 $data['file_path'] = null;
             }
+            $data['file_disk'] = 'private';
+            $definition['attributes'][] = 'file_disk';
         }
 
         try {
             $model::query()->create(Arr::only($data, $definition['attributes']));
         } catch (UniqueConstraintViolationException $exception) {
+            if ($module === 'meeting-notes' && ! empty($data['file_path'])) {
+                Storage::disk('private')->delete($data['file_path']);
+            }
             if ($module !== 'inventory' || ! Inventory::withoutGlobalScopes()->where('code', $data['code'])->exists()) {
                 throw $exception;
             }
             throw ValidationException::withMessages(['code' => 'Kode inventaris sudah digunakan.']);
+        } catch (\Throwable $exception) {
+            if ($module === 'meeting-notes' && ! empty($data['file_path'])) {
+                Storage::disk('private')->delete($data['file_path']);
+            }
+            if ($module === 'members' && ! empty($data['photo_path'])) {
+                Storage::disk('public')->delete($data['photo_path']);
+            }
+            throw $exception;
         }
 
         return back()->with('status', 'Data berhasil disimpan.');
@@ -125,6 +153,7 @@ class ManagementController extends Controller
 
     public function updatePeriod(Request $request, Period $period): RedirectResponse
     {
+        Gate::authorize('manage-periods-and-admins');
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'start_year' => 'required|integer|min:2000|max:65535',
@@ -134,7 +163,7 @@ class ManagementController extends Controller
         $period->update($data);
         cache()->forget('active_period_id');
 
-        return back()->with('status', 'Periode kepengurusan berhasil diperbarui menjadi ' . $period->name . '.');
+        return back()->with('status', 'Periode kepengurusan berhasil diperbarui menjadi '.$period->name.'.');
     }
 
     public function updateMember(Request $request, Member $member): RedirectResponse
@@ -155,18 +184,31 @@ class ManagementController extends Controller
         $data = $request->validate($rules);
         $data['sort_order'] = $data['sort_order'] ?? 0;
 
+        $newPhoto = null;
+        $oldPhoto = $member->photo_path;
         if ($request->hasFile('photo')) {
-            $path = $request->file('photo')->store('members', 'public');
-            $data['photo_path'] = $path;
+            $newPhoto = $request->file('photo')->store('members', 'public');
+            abort_unless($newPhoto, 500, 'Foto gagal disimpan.');
+            $data['photo_path'] = $newPhoto;
         } elseif (empty($data['photo_path'])) {
             $data['photo_path'] = $member->photo_path;
         }
 
         unset($data['photo']);
 
-        $member->update($data);
+        try {
+            $member->update($data);
+        } catch (\Throwable $exception) {
+            if ($newPhoto) {
+                Storage::disk('public')->delete($newPhoto);
+            }
+            throw $exception;
+        }
+        if ($newPhoto && $oldPhoto && str_starts_with($oldPhoto, 'members/')) {
+            Storage::disk('public')->delete($oldPhoto);
+        }
 
-        return redirect()->route('app.members.index')->with('status', 'Data pengurus ' . $member->name . ' berhasil diperbarui.');
+        return redirect()->route('app.members.index')->with('status', 'Data pengurus '.$member->name.' berhasil diperbarui.');
     }
 
     public function editProgram(Program $program): View
@@ -185,15 +227,18 @@ class ManagementController extends Controller
     public function updateProgram(Request $request, Program $program): RedirectResponse
     {
         foreach (['starts_at', 'ends_at'] as $dtField) {
-            if ($request->filled($dtField . '_date')) {
-                $time = $request->input($dtField . '_time') ?: '08:00';
+            if ($request->filled($dtField.'_date')) {
+                $time = $request->input($dtField.'_time') ?: '08:00';
                 $request->merge([
-                    $dtField => $request->input($dtField . '_date') . ' ' . $time,
+                    $dtField => $request->input($dtField.'_date').' '.$time,
                 ]);
             }
         }
 
-        $program->update($request->validate($this->definition('programs')['rules']));
+        $rules = $this->definition('programs')['rules'];
+        $data = $request->validate($rules);
+
+        $program->update($data);
 
         return redirect()->route('app.programs.index')->with('status', 'Program kerja berhasil diperbarui.');
     }
@@ -227,9 +272,21 @@ class ManagementController extends Controller
         $data = $request->validate($rules);
         $data['is_active'] = $request->boolean('is_active');
 
-        $inventory->update($data);
+        $periodId = $inventory->period_id;
+        DB::transaction(function () use ($inventory, $data, $periodId) {
+            $inventory = Inventory::withoutGlobalScopes()->where('period_id', $periodId)->lockForUpdate()->findOrFail($inventory->id);
+            if ($inventory->stock_version !== 2) {
+                throw ValidationException::withMessages(['available_qty' => 'Rekonsiliasi stok lama harus diselesaikan sebelum penyuntingan.']);
+            }
+            $out = $inventory->checkedOutQuantity();
+            $peak = app(CheckBorrowingConflictAction::class)->peakReserved($inventory, now(), Carbon::create(9999, 12, 31));
+            if ($data['total_qty'] < $data['available_qty'] + $out || $peak > $data['available_qty'] + $out) {
+                throw ValidationException::withMessages(['available_qty' => 'Jumlah tidak sesuai unit yang sedang dipinjam atau reservasi yang telah disetujui.']);
+            }
+            $inventory->update($data);
+        }, 3);
 
-        return redirect()->route('app.inventory.index')->with('status', 'Data alat inventaris ' . $inventory->name . ' berhasil diperbarui.');
+        return redirect()->route('app.inventory.index')->with('status', 'Data alat inventaris '.$inventory->name.' berhasil diperbarui.');
     }
 
     public function editMeetingNote(MeetingNote $note): View
@@ -250,7 +307,7 @@ class ManagementController extends Controller
         if ($request->filled('held_at_date')) {
             $time = $request->input('held_at_time') ?: '09:00';
             $request->merge([
-                'held_at' => $request->input('held_at_date') . ' ' . $time,
+                'held_at' => $request->input('held_at_date').' '.$time,
             ]);
         }
 
@@ -264,25 +321,36 @@ class ManagementController extends Controller
 
         $data = $request->validate($rules);
 
+        $oldPath = $note->file_path;
+        $oldDisk = $note->file_disk;
+        $newPath = null;
         if ($request->hasFile('file')) {
-            if ($note->file_path && Storage::disk('public')->exists($note->file_path)) {
-                Storage::disk('public')->delete($note->file_path);
+            $newPath = $request->file('file')->store('meeting-notes', 'private');
+            abort_unless($newPath, 500, 'Berkas gagal disimpan.');
+            $data['file_path'] = $newPath;
+            $data['file_disk'] = 'private';
+        }
+        unset($data['file']);
+        try {
+            $note->update($data);
+        } catch (\Throwable $exception) {
+            if ($newPath) {
+                Storage::disk('private')->delete($newPath);
             }
-            $data['file_path'] = $request->file('file')->store('meeting-notes', 'public');
+            throw $exception;
+        }
+        if ($newPath && $oldPath) {
+            Storage::disk($oldDisk)->delete($oldPath);
         }
 
-        unset($data['file']);
-
-        $note->update($data);
-
-        return redirect()->route('app.meeting-notes.index')->with('status', 'Notulensi rapat ' . $note->title . ' berhasil diperbarui.');
+        return redirect()->route('app.meeting-notes.index')->with('status', 'Notulensi rapat '.$note->title.' berhasil diperbarui.');
     }
 
     public function downloadMeetingNote(MeetingNote $note)
     {
-        abort_unless($note->file_path && Storage::disk('public')->exists($note->file_path), 404);
+        abort_unless($note->file_disk === 'private' && $note->file_path && Storage::disk('private')->exists($note->file_path), 404);
 
-        return Storage::disk('public')->download($note->file_path, 'notulensi-' . str($note->title)->slug() . '.' . pathinfo($note->file_path, PATHINFO_EXTENSION));
+        return Storage::disk('private')->download($note->file_path, 'notulensi-'.str($note->title)->slug().'.'.pathinfo($note->file_path, PATHINFO_EXTENSION));
     }
 
     private function definition(string $module): array

@@ -14,6 +14,7 @@ use App\Models\CashTransaction;
 use App\Models\Member;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -40,20 +41,29 @@ Route::get('/aset/{asset}/unduh', AssetDownloadController::class)->name('assets.
 */
 Route::get('/login', fn () => redirect()->route('home'))->name('login.form');
 Route::post('/login', function (Request $request) {
-    $credentials = $request->validate([
+    $credentials = $request->validateWithBag('login', [
         'email' => ['required', 'email'],
-        'password' => ['required'],
+        'password' => ['required', 'string'],
     ]);
 
+    $key = 'login:'.hash('sha256', mb_strtolower($credentials['email']).'|'.$request->ip());
+    $ipKey = 'login-ip:'.hash('sha256', (string) $request->ip());
+    if (RateLimiter::tooManyAttempts($key, 5) || RateLimiter::tooManyAttempts($ipKey, 20)) {
+        return back()->withErrors(['email' => 'Terlalu banyak percobaan masuk. Silakan tunggu satu menit.'], 'login')->onlyInput('email')->withHeaders(['Retry-After' => '60']);
+    }
     if (Auth::attempt($credentials, $request->boolean('remember'))) {
+        RateLimiter::clear($key);
         $request->session()->regenerate();
 
         return redirect()->intended(route('app.dashboard'))->with('status', 'Berhasil masuk ke sistem.');
     }
 
+    RateLimiter::hit($key, 60);
+    RateLimiter::hit($ipKey, 60);
+
     return back()->withErrors([
         'email' => 'Kredensial yang diberikan tidak cocok dengan data kami.',
-    ])->onlyInput('email');
+    ], 'login')->onlyInput('email');
 })->name('login');
 
 Route::post('/logout', function (Request $request) {
@@ -94,7 +104,7 @@ Route::middleware(['auth', 'can:manage-command-center'])->prefix('app')->as('app
     Route::post('/notulensi', [ManagementController::class, 'store'])->defaults('module', 'meeting-notes')->name('meeting-notes.store');
     Route::get('/notulensi/{note}/edit', [ManagementController::class, 'editMeetingNote'])->name('meeting-notes.edit');
     Route::put('/notulensi/{note}', [ManagementController::class, 'updateMeetingNote'])->name('meeting-notes.update');
-    Route::get('/notulensi/{note}/unduh', [ManagementController::class, 'downloadMeetingNote'])->name('meeting-notes.download');
+    Route::get('/notulensi/{note}/unduh', [ManagementController::class, 'downloadMeetingNote'])->middleware('signed')->name('meeting-notes.download');
     Route::get('/aset', [OperationsController::class, 'index'])->defaults('module', 'assets')->name('assets.index');
     Route::post('/aset', [OperationsController::class, 'store'])->defaults('module', 'assets')->name('assets.store');
     Route::get('/operasional/{module}', [OperationsController::class, 'index'])->whereIn('module', ['borrowings', 'aspirations', 'attendance', 'letters', 'assets', 'committees', 'periods', 'admins', 'receipts'])->name('operations.index');

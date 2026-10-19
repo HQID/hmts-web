@@ -17,9 +17,14 @@ class UpdateBorrowingStatusAction
     public function execute(int $id, string $status, ?string $note, User $actor): Borrowing
     {
         Gate::forUser($actor)->authorize('manage-command-center');
+        $periodId = Period::current()?->id;
+        $inventoryIds = Borrowing::where('period_id', $periodId)->findOrFail($id)->items()->orderBy('inventory_id')->pluck('inventory_id')->all();
 
-        return DB::transaction(function () use ($id, $status, $note, $actor) {
-            $borrowing = Borrowing::where('period_id', Period::current()?->id)->lockForUpdate()->findOrFail($id);
+        return DB::transaction(function () use ($id, $status, $note, $actor, $periodId, $inventoryIds) {
+            // Lock stock before any consistent read: MySQL REPEATABLE READ must see the previous reservation commit.
+            $inventories = Inventory::withoutGlobalScopes()->where('period_id', $periodId)
+                ->whereIn('id', $inventoryIds)->orderBy('id')->lockForUpdate()->get()->keyBy('id');
+            $borrowing = Borrowing::withoutGlobalScopes()->where('period_id', $periodId)->lockForUpdate()->findOrFail($id);
             if (! in_array($status, $borrowing->allowedStatuses(), true)) {
                 throw ValidationException::withMessages(['status' => 'Perubahan status peminjaman tidak valid. Muat ulang data sebelum mencoba lagi.']);
             }
@@ -29,21 +34,25 @@ class UpdateBorrowingStatusAction
                 throw ValidationException::withMessages(['status' => 'Pengajuan tidak memiliki alat.']);
             }
 
-            $inventories = Inventory::where('period_id', $borrowing->period_id)
-                ->whereIn('id', $items->pluck('inventory_id'))->orderBy('id')->lockForUpdate()->get()->keyBy('id');
-
             foreach ($items as $item) {
                 $inventory = $inventories->get($item->inventory_id);
                 if (! $inventory || $item->qty < 1) {
                     throw ValidationException::withMessages(['status' => 'Data alat pada pengajuan tidak valid.']);
                 }
+                if ($inventory->stock_version !== 2) {
+                    throw ValidationException::withMessages(['status' => 'Stok lama perlu direkonsiliasi oleh pengelola sebelum transaksi.']);
+                }
 
                 if ($status === 'disetujui') {
-                    if (! $inventory->is_active || $inventory->available_qty < $item->qty || ! $this->conflicts->isAvailable($inventory, $item->qty, $borrowing->start_time, $borrowing->expected_return_time, $borrowing->id)) {
+                    if (! $this->conflicts->isAvailable($inventory, $item->qty, $borrowing->start_time, $borrowing->expected_return_time, $borrowing->id)) {
                         throw ValidationException::withMessages(['status' => 'Stok atau jadwal '.$inventory->name.' tidak tersedia.']);
                     }
+                } elseif ($status === 'dipinjam') {
+                    if (! $inventory->is_active || $inventory->condition !== 'baik' || $inventory->available_qty < $item->qty || now()->lt($borrowing->start_time) || now()->gte($borrowing->expected_return_time)) {
+                        throw ValidationException::withMessages(['status' => 'Alat fisik atau waktu serah-terima belum tersedia.']);
+                    }
                     $inventory->decrement('available_qty', $item->qty);
-                } elseif ($status === 'dikembalikan' || ($status === 'ditolak' && $borrowing->status === 'disetujui')) {
+                } elseif ($status === 'dikembalikan') {
                     if ($inventory->available_qty + $item->qty > $inventory->total_qty) {
                         throw ValidationException::withMessages(['status' => 'Stok alat tidak konsisten. Periksa data sebelum melanjutkan.']);
                     }

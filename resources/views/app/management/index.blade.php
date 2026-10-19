@@ -93,7 +93,7 @@
                                 <div class="flex-1 w-full space-y-2 min-w-0">
                                     <span class="text-xs text-zinc-300 font-medium block">Unggah Foto Baru (Potret)</span>
                                     <input type="file" name="photo" accept="image/*" class="block w-full min-w-0 text-xs text-zinc-300 file:mr-3 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-brand-yellow file:text-black hover:file:bg-brand-yellowHover cursor-pointer file:cursor-pointer bg-[#181822] border border-white/10 rounded-xl p-2.5">
-                                    <p class="text-[11px] text-zinc-400">Rekomendasi rasio potret 3:4. Format: JPG, PNG, WEBP, SVG (Maksimal 3 MB). Biarkan kosong jika tetap menggunakan foto lama.</p>
+                                    <p class="text-[11px] text-zinc-400">Rekomendasi rasio potret 3:4. Format: JPG, PNG, WEBP (Maksimal 3 MB). Biarkan kosong jika tetap menggunakan foto lama.</p>
                                     <input type="hidden" name="photo_path" value="{{ old('photo_path', $editing->photo_path) }}">
                                     @error('photo')<p class="text-xs text-red-400 mt-1">{{ $message }}</p>@enderror
                                     @error('photo_path')<p class="text-xs text-red-400 mt-1">{{ $message }}</p>@enderror
@@ -207,7 +207,7 @@
                         </p>
                     </div>
                     <div class="flex flex-wrap items-center gap-3">
-                        @if($period)
+                        @if($period && auth()->user()->isSuperAdmin())
                             <!-- Tombol Modal Edit Periode di Info Bagan -->
                             <details class="group relative">
                                 <summary class="cursor-pointer inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-zinc-300 hover:border-brand-yellow hover:text-brand-yellow hover:bg-white/[0.04] transition-colors list-none">
@@ -259,7 +259,7 @@
                 @php
                     $bphList = $records->filter(fn($m) => $m->isBph() || $m->division?->name === 'BPH');
                     $coordList = $records->reject(fn($m) => $m->isBph() || $m->division?->name === 'BPH');
-                    $ketua = $bphList->first(fn($m) => str_contains(strtolower($m->position), 'ketua') && !str_contains(strtolower($m->position), '1') && !str_contains(strtolower($m->position), '2'));
+                    $ketua = $bphList->first(fn($m) => in_array(mb_strtolower(trim($m->position)), ['ketua', 'ketua himpunan'], true));
                     $otherBph = $bphList->reject(fn($m) => $m->id === $ketua?->id);
                 @endphp
 
@@ -581,8 +581,8 @@
                             @if(isset($editing) && !empty($editing->file_path))
                                 <div class="mt-1 flex items-center gap-2 text-xs font-mono text-brand-yellow">
                                     <span class="px-2 py-0.5 rounded bg-brand-yellow/10 border border-brand-yellow/30">Berkas tersimpan: {{ basename($editing->file_path) }}</span>
-                                    @if($module === 'meeting-notes')
-                                        <a href="{{ route('app.meeting-notes.download', $editing) }}" class="underline font-bold text-white hover:text-brand-yellow">Unduh 📥</a>
+                                    @if($module === 'meeting-notes' && $editing->file_url)
+                                        <a href="{{ $editing->file_url }}" class="underline font-bold text-white hover:text-brand-yellow">Unduh 📥</a>
                                     @endif
                                 </div>
                             @endif
@@ -705,7 +705,7 @@
                                 @foreach(array_keys($definition['columns']) as $column)
                                     <td class="px-5 py-4">
                                         @if($column === 'file_path')
-                                            @if($record->file_path)
+                                            @if($record->file_path && $record->file_url)
                                                 <div class="flex items-center gap-2.5">
                                                     @if($record->file_url)
                                                         <a href="{{ $record->file_url }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-xs text-white hover:text-brand-yellow font-mono underline">
@@ -713,13 +713,13 @@
                                                             <span>↗</span>
                                                         </a>
                                                     @endif
-                                                    <a href="{{ route('app.meeting-notes.download', $record) }}" class="inline-flex items-center gap-1 text-xs text-brand-yellow hover:underline font-mono">
+                                                    <a href="{{ $record->file_url }}" class="inline-flex items-center gap-1 text-xs text-brand-yellow hover:underline font-mono">
                                                         <span>Unduh</span>
                                                         <span>📥</span>
                                                     </a>
                                                 </div>
                                             @else
-                                                <span class="text-xs text-zinc-500 font-mono">Tanpa Berkas</span>
+                                                <span class="text-xs text-zinc-500 font-mono">{{ $record->file_path ? 'Menunggu pemindahan berkas privat' : 'Tanpa Berkas' }}</span>
                                             @endif
                                         @elseif($column === 'category' && $module === 'programs')
                                             <span class="inline-block px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-zinc-300">
@@ -749,8 +749,8 @@
                                         </a>
                                     @elseif($module === 'meeting-notes')
                                         <div class="flex items-center justify-end gap-3">
-                                            @if($record->file_path)
-                                                <a href="{{ route('app.meeting-notes.download', $record) }}" class="text-xs text-emerald-400 hover:underline">Unduh 📥</a>
+                                            @if($record->file_path && $record->file_url)
+                                                <a href="{{ $record->file_url }}" class="text-xs text-emerald-400 hover:underline">Unduh 📥</a>
                                             @endif
                                             <a href="{{ route('app.meeting-notes.edit', $record) }}" class="inline-flex items-center gap-1 text-xs font-semibold text-brand-yellow hover:underline">
                                                 <span>Sunting</span>

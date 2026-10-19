@@ -59,12 +59,16 @@
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        @foreach ($tools as $index => $tool)
+                        @forelse ($tools as $index => $tool)
+                            @php($hasPhoto = $tool->photo_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($tool->photo_path))
+                            @php($canRequest = $tool->condition === 'baik' && $tool->total_qty > 0 && $tool->stock_version === 2)
                             <div class="clean-card p-4 flex flex-col justify-between group motion-reveal delay-{{ (($index % 4) + 1) * 75 }}">
                                 <div>
-                                    <div class="h-32 sm:h-36 rounded-xl overflow-hidden bg-black/40 mb-3 border border-white/5 relative">
-                                        <div class="flex h-full items-center justify-center font-mono text-xs text-zinc-500">{{ $tool->code }}</div>
-                                        <span class="absolute top-2 right-2 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-mono">
+                                    <div class="{{ $hasPhoto ? 'h-32 sm:h-36' : 'min-h-14' }} rounded-xl overflow-hidden bg-black/40 mb-3 border border-white/5 relative">
+                                        @if($hasPhoto)
+                                            <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($tool->photo_path) }}" alt="{{ $tool->name }}" class="h-full w-full object-cover" loading="lazy">
+                                        @else<div class="flex min-h-14 items-center px-3 font-mono text-xs text-zinc-500">{{ $tool->code }}</div>@endif
+                                        <span class="absolute top-2 right-2 px-2.5 py-0.5 rounded-full border text-[10px] font-mono {{ $canRequest && $tool->available_qty > 0 ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-zinc-800 text-zinc-300 border-white/10' }}">
                                             {{ $tool->available_qty }} Unit Tersedia
                                         </span>
                                     </div>
@@ -74,19 +78,22 @@
                                 </div>
 
                                 <div class="mt-5 pt-3 border-t border-white/10 flex items-center justify-between">
-                                    <span class="text-xs font-mono text-zinc-400">Status: <strong class="text-emerald-400">{{ $tool->condition === 'baik' ? 'Tersedia' : 'Perlu Pemeriksaan' }}</strong></span>
+                                    <span class="text-xs font-mono text-zinc-400">Status: <strong class="{{ $canRequest && $tool->available_qty > 0 ? 'text-emerald-400' : 'text-zinc-300' }}">{{ $tool->stock_version !== 2 ? 'Stok sedang diperiksa' : ($tool->condition !== 'baik' ? 'Perlu Pemeriksaan' : ($tool->available_qty > 0 ? 'Tersedia fisik' : 'Stok fisik habis')) }}</strong></span>
                                     <button type="button" 
                                             wire:click="selectInventory({{ $tool->id }})"
+                                            @disabled(!$canRequest)
                                             class="text-xs font-mono text-brand-orange hover:underline font-bold cursor-pointer">
                                         Pilih Alat →
                                     </button>
                                 </div>
                             </div>
-                        @endforeach
+                        @empty
+                            <p class="py-6 text-sm text-zinc-400 sm:col-span-2 lg:col-span-4">Belum ada alat yang dapat diajukan pada periode ini.</p>
+                        @endforelse
                     </div>
 
                     <!-- Formulir Peminjaman Inline -->
-                    <div class="clean-card p-6 sm:p-8 border border-white/15 mt-8">
+                    <div id="borrow-form" tabindex="-1" class="clean-card scroll-mt-24 p-6 sm:p-8 border border-white/15 mt-8">
                         <div class="pb-4 mb-6 border-b border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                             <div>
                                 <span class="font-mono text-xs text-brand-yellow font-semibold uppercase block mb-1">Pengajuan Langsung</span>
@@ -99,7 +106,7 @@
                         @if ($borrowSuccess)
                             <div class="p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-center font-mono text-xs space-y-2">
                                 <div class="text-lg font-bold">✓ Pengajuan Peminjaman Berhasil Dikirim!</div>
-                                <p class="text-zinc-300 font-sans text-xs">Pengurus Divisi Ristek/Inventaris akan memverifikasi jadwal Anda. Bukti peminjaman akan dikonfirmasi melalui kontak WhatsApp yang terdaftar.</p>
+                                <p class="text-zinc-300 font-sans text-xs">Pengajuan menunggu persetujuan pengurus. Hubungi sekretariat untuk konfirmasi. Persetujuan jadwal belum berarti alat sudah diserahkan.</p>
                                 <button type="button" wire:click="resetBorrowForm" class="mt-3 px-4 py-2 rounded-full bg-emerald-500 text-black font-bold uppercase cursor-pointer">
                                     Ajukan Alat Lain
                                 </button>
@@ -108,38 +115,38 @@
                             <form wire:submit.prevent="submitBorrowForm" class="space-y-4 font-mono text-xs">
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
-                                        <label class="block text-zinc-300 font-semibold mb-1 uppercase">Nama Lengkap Mahasiswa</label>
-                                        <input type="text" wire:model="borrowName" required maxlength="255" placeholder="Contoh: Muhammad Raihan" class="w-full bg-[#181822] border border-white/10 focus:border-brand-orange rounded-xl px-4 py-2.5 text-white outline-none">
+                                        <label for="borrowName" class="block text-zinc-300 font-semibold mb-1 uppercase">Nama Lengkap Mahasiswa</label>
+                                        <input type="text" id="borrowName" wire:model="borrowName" required maxlength="255" placeholder="Contoh: Muhammad Raihan" class="w-full bg-[#181822] border border-white/10 focus:border-brand-orange rounded-xl px-4 py-2.5 text-white outline-none">
                                         @error('borrowName') <span class="text-red-400 text-[10px]">{{ $message }}</span> @enderror
                                     </div>
                                     <div>
-                                        <label class="block text-zinc-300 font-semibold mb-1 uppercase">NIM Mahasiswa</label>
-                                        <input type="text" wire:model="borrowNim" required maxlength="30" placeholder="F111XXXXX" class="w-full bg-[#181822] border border-white/10 focus:border-brand-orange rounded-xl px-4 py-2.5 text-white outline-none">
+                                        <label for="borrowNim" class="block text-zinc-300 font-semibold mb-1 uppercase">NIM Mahasiswa</label>
+                                        <input type="text" id="borrowNim" wire:model="borrowNim" required maxlength="30" placeholder="F111XXXXX" class="w-full bg-[#181822] border border-white/10 focus:border-brand-orange rounded-xl px-4 py-2.5 text-white outline-none">
                                         @error('borrowNim') <span class="text-red-400 text-[10px]">{{ $message }}</span> @enderror
                                     </div>
                                 </div>
 
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
-                                        <label class="block text-zinc-300 font-semibold mb-1 uppercase">Tanggal Pinjam</label>
-                                        <input type="date" wire:model="borrowStartDate" required onclick="this.showPicker()" class="w-full bg-[#181822] border border-white/10 focus:border-brand-orange rounded-xl px-4 py-2.5 text-white outline-none [color-scheme:dark] cursor-pointer">
+                                        <label for="borrowStartDate" class="block text-zinc-300 font-semibold mb-1 uppercase">Tanggal Pinjam</label>
+                                        <input type="date" id="borrowStartDate" wire:model="borrowStartDate" required onclick="this.showPicker()" class="w-full bg-[#181822] border border-white/10 focus:border-brand-orange rounded-xl px-4 py-2.5 text-white outline-none [color-scheme:dark] cursor-pointer">
                                         @error('borrowStartDate') <span class="text-red-400 text-[10px]">{{ $message }}</span> @enderror
                                     </div>
                                     <div>
-                                        <label class="block text-zinc-300 font-semibold mb-1 uppercase">Tanggal Pengembalian</label>
-                                        <input type="date" wire:model="borrowEndDate" required onclick="this.showPicker()" class="w-full bg-[#181822] border border-white/10 focus:border-brand-orange rounded-xl px-4 py-2.5 text-white outline-none [color-scheme:dark] cursor-pointer">
+                                        <label for="borrowEndDate" class="block text-zinc-300 font-semibold mb-1 uppercase">Tanggal Pengembalian</label>
+                                        <input type="date" id="borrowEndDate" wire:model="borrowEndDate" required onclick="this.showPicker()" class="w-full bg-[#181822] border border-white/10 focus:border-brand-orange rounded-xl px-4 py-2.5 text-white outline-none [color-scheme:dark] cursor-pointer">
                                         @error('borrowEndDate') <span class="text-red-400 text-[10px]">{{ $message }}</span> @enderror
                                     </div>
                                 </div>
 
                                 <div>
-                                    <label class="block text-zinc-300 font-semibold mb-1 uppercase">Keperluan Peminjaman</label>
-                                    <textarea wire:model="borrowPurpose" rows="2" required maxlength="5000" placeholder="Praktikum Ilmu Ukur Tanah / Tugas Akhir Pemetaan Topografi..." class="w-full bg-[#181822] border border-white/10 focus:border-brand-orange rounded-xl px-4 py-2 text-white outline-none font-sans text-xs"></textarea>
+                                    <label for="borrowPurpose" class="block text-zinc-300 font-semibold mb-1 uppercase">Keperluan Peminjaman</label>
+                                    <textarea id="borrowPurpose" wire:model="borrowPurpose" rows="2" required maxlength="5000" placeholder="Praktikum Ilmu Ukur Tanah / Tugas Akhir Pemetaan Topografi..." class="w-full bg-[#181822] border border-white/10 focus:border-brand-orange rounded-xl px-4 py-2 text-white outline-none font-sans text-xs"></textarea>
                                     @error('borrowPurpose') <span class="text-red-400 text-[10px]">{{ $message }}</span> @enderror
                                 </div>
 
                                 <div class="pt-2 flex justify-end">
-                                    <button type="submit" class="bg-brand-orange hover:bg-brand-orangeHover text-white px-6 py-3 rounded-full font-mono text-xs font-bold uppercase shadow-lg shadow-brand-orange/20 cursor-pointer">
+                                    <button wire:loading.attr="disabled" wire:target="submitBorrowForm" type="submit" class="bg-brand-orange hover:bg-brand-orangeHover text-white px-6 py-3 rounded-full font-mono text-xs font-bold uppercase shadow-lg shadow-brand-orange/20 cursor-pointer">
                                         Kirim Pengajuan Reservasi ↗
                                     </button>
                                 </div>
@@ -157,11 +164,10 @@
                     <span class="text-brand-yellow font-mono text-xs font-semibold uppercase block mb-1">Presensi Mandiri QR Code</span>
                     <h3 class="font-display font-bold text-2xl text-white uppercase mb-6">Scan QR & Token Sesi Acara</h3>
 
-                    <!-- Viewfinder Simulator -->
-                    <div class="w-64 h-64 mx-auto rounded-3xl border-2 border-dashed border-brand-yellow/60 bg-black/60 relative overflow-hidden flex flex-col items-center justify-center p-4 mb-6 shadow-2xl">
-                        <div class="absolute inset-x-0 h-0.5 bg-brand-yellow animate-pulse top-1/2"></div>
-                        <svg class="w-16 h-16 text-zinc-600 mb-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z"></path></svg>
-                        <span class="text-xs font-mono text-zinc-400">Arahkan kamera ke layar QR proyektor</span>
+                    <div x-data="hmtsStudentScanner($wire)" class="mb-6 space-y-3">
+                        <div id="student-qr-reader" x-show="scanning" class="mx-auto max-w-sm overflow-hidden rounded-2xl"></div>
+                        <button type="button" @click="scanning ? stop() : start()" class="rounded-full border border-brand-yellow/50 px-5 py-3 text-sm text-brand-yellow" x-text="scanning ? 'Hentikan kamera' : 'Mulai kamera QR'"></button>
+                        <p role="status" class="text-sm text-zinc-300" x-text="message">Gunakan kamera atau isi sesi dan token secara manual.</p>
                     </div>
 
                     @if ($qrAttendanceStatus === 'success')
@@ -172,19 +178,28 @@
 
                     <!-- Form Token Input Manual -->
                     <form wire:submit.prevent="submitAttendance" class="space-y-4 max-w-sm mx-auto font-mono text-xs text-left">
+                        <label class="block text-zinc-300">Pilih sesi presensi
+                            <select wire:model="qrSessionId" class="mt-2 w-full rounded-xl border border-white/10 bg-[#181822] p-3 text-white">
+                                <option value="">Pilih sesi yang Anda ikuti</option>
+                                @foreach ($attendanceSessions as $attendanceSession)
+                                    <option value="{{ $attendanceSession->id }}">{{ $attendanceSession->title }}</option>
+                                @endforeach
+                            </select>
+                        </label>
+                        @error('qrSessionId') <p role="alert" class="text-red-400">Pilih sesi presensi yang benar.</p> @enderror
                         <div>
-                            <label class="block text-zinc-300 font-semibold mb-1 uppercase">NIM Mahasiswa</label>
-                            <input type="text" wire:model="qrNim" required maxlength="30" placeholder="F111XXXXX" class="w-full bg-[#181822] border border-white/10 focus:border-brand-orange rounded-xl px-4 py-2.5 text-white outline-none">
+                            <label for="qrNim" class="block text-zinc-300 font-semibold mb-1 uppercase">NIM Mahasiswa</label>
+                            <input type="text" id="qrNim" wire:model="qrNim" required maxlength="30" placeholder="F111XXXXX" class="w-full bg-[#181822] border border-white/10 focus:border-brand-orange rounded-xl px-4 py-2.5 text-white outline-none">
                             @error('qrNim') <span class="text-red-400 text-[10px]">{{ $message }}</span> @enderror
                         </div>
 
                         <div>
-                            <label class="block text-zinc-300 font-semibold mb-1 uppercase">Token Sesi 6-Digit</label>
-                            <input type="text" wire:model="qrToken" required maxlength="6" placeholder="Contoh: 829140" class="w-full bg-[#181822] border border-white/10 focus:border-brand-orange rounded-xl px-4 py-2.5 text-white outline-none tracking-widest text-center text-sm font-bold">
+                            <label for="qrToken" class="block text-zinc-300 font-semibold mb-1 uppercase">Token Sesi 6-Digit</label>
+                            <input type="text" id="qrToken" wire:model="qrToken" required maxlength="6" placeholder="Contoh: 829140" class="w-full bg-[#181822] border border-white/10 focus:border-brand-orange rounded-xl px-4 py-2.5 text-white outline-none tracking-widest text-center text-sm font-bold">
                             @error('qrToken') <span class="text-red-400 text-[10px]">{{ $message }}</span> @enderror
                         </div>
 
-                        <button type="submit" class="w-full bg-brand-orange hover:bg-brand-orangeHover text-white py-3 rounded-full font-bold uppercase tracking-wider transition-all shadow-md shadow-brand-orange/20 cursor-pointer active:scale-[0.98]">
+                        <button wire:loading.attr="disabled" wire:target="submitAttendance" type="submit" class="w-full bg-brand-orange hover:bg-brand-orangeHover text-white py-3 rounded-full font-bold uppercase tracking-wider transition-all shadow-md shadow-brand-orange/20 cursor-pointer active:scale-[0.98]">
                             Validasi Presensi Sekarang ↗
                         </button>
                     </form>
@@ -225,7 +240,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-zinc-300 font-semibold mb-1 uppercase">Kategori Aspirasi</label>
-                                    <select wire:model="aspirationCategory" class="w-full bg-[#181822] border border-white/10 focus:border-brand-orange rounded-xl text-white px-4 py-2.5 outline-none font-sans text-xs">
+                                    <select aria-label="Kategori aspirasi" wire:model="aspirationCategory" class="w-full bg-[#181822] border border-white/10 focus:border-brand-orange rounded-xl text-white px-4 py-2.5 outline-none font-sans text-xs">
                                         <option value="Fasilitas & Lab">Fasilitas & Kelengkapan Lab</option>
                                         <option value="Akademik & Perkuliahan">Akademik & Perkuliahan</option>
                                         <option value="Kegiatan Kemahasiswaan">Kegiatan Kemahasiswaan & Proker</option>
@@ -234,12 +249,12 @@
                                 </div>
 
                                 <div>
-                                    <label class="block text-zinc-300 font-semibold mb-1 uppercase">Isi Masukan / Aduan</label>
-                                    <textarea wire:model="aspirationMessage" rows="4" required placeholder="Tuliskan aspirasi, kritik konstruktif, atau masukan perbaikan sarana secara objektif..." class="w-full bg-[#181822] border border-white/10 focus:border-brand-orange rounded-xl px-4 py-2.5 text-white outline-none font-sans text-xs leading-relaxed"></textarea>
+                                    <label for="aspirationMessage" class="block text-zinc-300 font-semibold mb-1 uppercase">Isi Masukan / Aduan</label>
+                                    <textarea id="aspirationMessage" wire:model="aspirationMessage" rows="4" required placeholder="Tuliskan aspirasi, kritik konstruktif, atau masukan perbaikan sarana secara objektif..." class="w-full bg-[#181822] border border-white/10 focus:border-brand-orange rounded-xl px-4 py-2.5 text-white outline-none font-sans text-xs leading-relaxed"></textarea>
                                     @error('aspirationMessage') <span class="text-red-400 text-[10px]">{{ $message }}</span> @enderror
                                 </div>
 
-                                <button type="submit" class="bg-brand-orange hover:bg-brand-orangeHover text-white px-6 py-3 rounded-full font-bold uppercase tracking-wider transition-all shadow-md shadow-brand-orange/20 cursor-pointer active:scale-[0.98]">
+                                <button wire:loading.attr="disabled" wire:target="submitAspiration" type="submit" class="bg-brand-orange hover:bg-brand-orangeHover text-white px-6 py-3 rounded-full font-bold uppercase tracking-wider transition-all shadow-md shadow-brand-orange/20 cursor-pointer active:scale-[0.98]">
                                     Kirimkan Aspirasi (Anonim) ↗
                                 </button>
                             </form>
@@ -252,7 +267,7 @@
                         <h4 class="font-display font-bold text-lg text-white uppercase mb-3">Lacak Status Tiket Aspirasi</h4>
 
                         <div class="flex flex-col sm:flex-row gap-2 font-mono text-xs">
-                            <input type="text" wire:model="trackTicketInput" placeholder="Masukkan Kode Tiket (misal: ASP-2026-XXXXX)" class="flex-1 bg-[#181822] border border-white/10 rounded-xl px-4 py-2.5 text-white outline-none">
+                            <input type="text" aria-label="Kode tiket aspirasi" wire:model="trackTicketInput" placeholder="Masukkan Kode Tiket (misal: ASP-2026-XXXXX)" class="flex-1 bg-[#181822] border border-white/10 rounded-xl px-4 py-2.5 text-white outline-none">
                             <button type="button" wire:click="searchTicket" class="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold cursor-pointer active:scale-[0.98]">
                                 Lacak Tiket →
                             </button>
@@ -284,54 +299,26 @@
                         <span class="text-xs font-mono text-zinc-400">Arsip terverifikasi Departemen Teknik Sipil UNTAD</span>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                        <div class="clean-card p-5 flex flex-col justify-between motion-reveal delay-75">
-                            <div>
-                                <span class="text-[10px] font-mono text-brand-yellow uppercase block mb-1">Identitas Visual</span>
-                                <h4 class="font-display font-bold text-base text-white mb-2">Master Logo Kit & Kop Surat</h4>
-                                <p class="text-xs text-zinc-400 font-sans leading-relaxed">Paket format PNG resolusi tinggi, SVG vektor resmi, dan template kop persuratan.</p>
-                            </div>
-                            <div class="mt-4 pt-3 border-t border-white/5 font-mono text-xs flex items-center justify-between">
-                                <span class="text-zinc-500">ZIP · 12 MB</span>
-                                <a href="{{ asset('images/hmts.png') }}" download class="text-brand-yellow hover:underline font-semibold">Unduh ↗</a>
-                            </div>
-                        </div>
-
-                        <div class="clean-card p-5 flex flex-col justify-between motion-reveal delay-150">
-                            <div>
-                                <span class="text-[10px] font-mono text-brand-yellow uppercase block mb-1">CAD Blueprint</span>
-                                <h4 class="font-display font-bold text-base text-white mb-2">Blueprint CAD Jembatan Busur 60m</h4>
-                                <p class="text-xs text-zinc-400 font-sans leading-relaxed">Berkas gambar kerja AutoCAD DWG jembatan rangka baja bentang 60 meter siap cetak.</p>
-                            </div>
-                            <div class="mt-4 pt-3 border-t border-white/5 font-mono text-xs flex items-center justify-between">
-                                <span class="text-zinc-500">DWG · 28 MB</span>
-                                <a href="#" onclick="alert('File CAD siap diunduh.'); return false;" class="text-brand-yellow hover:underline font-semibold">Unduh ↗</a>
-                            </div>
-                        </div>
-
-                        <div class="clean-card p-5 flex flex-col justify-between motion-reveal delay-225">
-                            <div>
-                                <span class="text-[10px] font-mono text-brand-yellow uppercase block mb-1">Publikasi Ilmiah</span>
-                                <h4 class="font-display font-bold text-base text-white mb-2">Paper Jurnal Inovasi Beton Serat</h4>
-                                <p class="text-xs text-zinc-400 font-sans leading-relaxed">Riset mahasiswa dan dosen terkait pemanfaatan serat bambu dalam daktilitas balok.</p>
-                            </div>
-                            <div class="mt-4 pt-3 border-t border-white/5 font-mono text-xs flex items-center justify-between">
-                                <span class="text-zinc-500">PDF · 4.2 MB</span>
-                                <a href="#" onclick="alert('File Paper Jurnal siap diunduh.'); return false;" class="text-brand-yellow hover:underline font-semibold">Unduh ↗</a>
-                            </div>
-                        </div>
-
-                        <div class="clean-card p-5 flex flex-col justify-between motion-reveal delay-300">
-                            <div>
-                                <span class="text-[10px] font-mono text-brand-yellow uppercase block mb-1">Pedoman Praktikum</span>
-                                <h4 class="font-display font-bold text-base text-white mb-2">Modul Praktikum Survei & Pemetaan</h4>
-                                <p class="text-xs text-zinc-400 font-sans leading-relaxed">Buku panduan lapangan praktikum Theodolite, Total Station, dan pengolahan data kontur.</p>
-                            </div>
-                            <div class="mt-4 pt-3 border-t border-white/5 font-mono text-xs flex items-center justify-between">
-                                <span class="text-zinc-500">PDF · 15 MB</span>
-                                <a href="#" onclick="alert('File Modul Praktikum siap diunduh.'); return false;" class="text-brand-yellow hover:underline font-semibold">Unduh ↗</a>
-                            </div>
-                        </div>
+                    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                        @forelse ($assets as $asset)
+                            <article class="clean-card flex flex-col justify-between p-6" wire:key="asset-{{ $asset->id }}">
+                                <div>
+                                    <p class="mb-2 text-xs font-mono text-brand-yellow">{{ $asset->category }}</p>
+                                    <h4 class="text-lg font-bold text-white">{{ $asset->title }}</h4>
+                                    <p class="mt-3 text-sm text-zinc-300">{{ $asset->description }}</p>
+                                </div>
+                                <div class="mt-5 flex items-center justify-between gap-3 border-t border-white/10 pt-4 text-xs">
+                                    @if ($asset->download_label)
+                                        <span class="font-mono text-zinc-400">{{ $asset->download_label }}</span>
+                                        <a href="{{ route('assets.download', $asset) }}" class="rounded-full bg-brand-orange px-4 py-2 font-bold text-white">Unduh berkas</a>
+                                    @else
+                                        <p class="text-zinc-400">Berkas belum tersedia. Silakan hubungi pengurus.</p>
+                                    @endif
+                                </div>
+                            </article>
+                        @empty
+                            <p class="clean-card p-8 text-zinc-300 sm:col-span-2 lg:col-span-3">Belum ada aset publik pada periode ini.</p>
+                        @endforelse
                     </div>
                 </div>
             @endif

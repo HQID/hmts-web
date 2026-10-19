@@ -5,6 +5,7 @@ namespace App\Livewire\Attendance;
 use App\Actions\Attendance\GenerateDynamicQrTokenAction;
 use App\Actions\Attendance\RecordAttendanceAction;
 use App\Models\AttendanceSession;
+use Illuminate\Contracts\View\View;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
@@ -39,17 +40,15 @@ class QrSessionDisplay extends Component
 
         if (! $this->sessionId) {
             $this->error = 'ID sesi tidak ditemukan. Silakan buka melalui menu Presensi.';
+
             return;
         }
 
         $session = AttendanceSession::find($this->sessionId);
         if (! $session) {
             $this->error = 'Sesi presensi tidak ditemukan.';
-            return;
-        }
 
-        if ($session->status === 'draft') {
-            $session->update(['status' => 'aktif']);
+            return;
         }
 
         $this->generateTokenForSession($session);
@@ -58,23 +57,25 @@ class QrSessionDisplay extends Component
     #[On('refreshQr')]
     public function refreshQr(): void
     {
-        $this->generateToken();
+        $this->generateToken(false);
     }
 
-    public function generateToken(): void
+    public function generateToken(bool $force = true): void
     {
         if (! $this->sessionId) {
             $this->error = 'ID sesi tidak valid.';
+
             return;
         }
 
         $session = AttendanceSession::find($this->sessionId);
         if (! $session) {
             $this->error = 'Sesi presensi tidak ditemukan.';
+
             return;
         }
 
-        $this->generateTokenForSession($session);
+        $this->generateTokenForSession($session, $force);
     }
 
     public function toggleScanner(): void
@@ -89,16 +90,19 @@ class QrSessionDisplay extends Component
 
         if (! $this->sessionId) {
             $this->scanResult = ['status' => 'error', 'message' => 'Sesi presensi belum dipilih.'];
+
             return;
         }
 
         if (empty($nim)) {
             $this->scanResult = ['status' => 'error', 'message' => 'NIM wajib diisi untuk presensi.'];
+
             return;
         }
 
         if (empty($token)) {
             $this->scanResult = ['status' => 'error', 'message' => 'Token QR wajib diisi.'];
+
             return;
         }
 
@@ -110,7 +114,7 @@ class QrSessionDisplay extends Component
 
             $this->scanResult = [
                 'status' => 'success',
-                'message' => "Presensi NIM {$nim} tercatat pada " . $attendance->attended_at->format('H:i:s') . ' WITA.',
+                'message' => "Presensi NIM {$nim} tercatat pada ".$attendance->attended_at->format('H:i:s').' WITA.',
             ];
 
             $this->scanNim = '';
@@ -124,28 +128,30 @@ class QrSessionDisplay extends Component
         } catch (\Throwable $e) {
             $this->scanResult = [
                 'status' => 'error',
-                'message' => 'Gagal mencatat presensi: ' . $e->getMessage(),
+                'message' => 'Gagal mencatat presensi: '.$e->getMessage(),
             ];
         }
     }
 
-    private function generateTokenForSession(AttendanceSession $session): void
+    private function generateTokenForSession(AttendanceSession $session, bool $force = false): void
     {
         try {
             $action = app(GenerateDynamicQrTokenAction::class);
-            $token = $action->execute($session);
+            $token = $action->execute($session, $force);
 
             $this->qrToken = $token;
-            $this->qrPayload = url('/layanan?tab=qr&token=' . $token);
-            $this->qrExpiresAt = time() + 30;
+            $this->qrPayload = url('/layanan?'.http_build_query(['tab' => 'qr', 'session' => $session->id, 'token' => $token]));
+            $this->qrExpiresAt = $session->fresh()->token_expires_at->timestamp;
             $this->error = null;
             $this->dispatch('qrRefreshed');
-        } catch (\Throwable $e) {
-            $this->error = 'Gagal membuat QR token: ' . $e->getMessage();
+        } catch (ValidationException $e) {
+            $this->qrToken = $this->qrPayload = null;
+            $this->qrExpiresAt = null;
+            $this->error = collect($e->errors())->flatten()->first();
         }
     }
 
-    public function render(): \Illuminate\Contracts\View\View
+    public function render(): View
     {
         $session = $this->sessionId ? AttendanceSession::withCount('attendances')->find($this->sessionId) : null;
         $recentAttendances = $session
